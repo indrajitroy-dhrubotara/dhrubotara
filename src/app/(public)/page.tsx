@@ -1,7 +1,5 @@
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
-import { BrandLegacy } from "@/components/BrandLegacy";
-import { Community } from "@/components/Community";
 import { ProductSection } from "@/components/ProductSection";
 import { CustomHamper } from "@/components/CustomHamper";
 import { Testimonials } from "@/components/Testimonials";
@@ -15,9 +13,7 @@ export default async function Home() {
       <Hero />
       <About />
       <ProductSection preloadedProducts={products} />
-      <BrandLegacy />
       <CustomHamper />
-      <Community />
       <Testimonials />
     </>
   );

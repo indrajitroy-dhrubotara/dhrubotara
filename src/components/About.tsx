@@ -1,6 +1,8 @@
 "use client";
 import { motion } from 'framer-motion';
 import { FadeInImage } from './ui/FadeInImage';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
 
 export function About() {
   return (
@@ -38,10 +40,10 @@ export function About() {
             </h2>
             <div className="space-y-6 text-stone-600 font-sans text-lg leading-relaxed">
               <p>
-                At Dhrubotara, we inherited a rich legacy of having lovingly curated the rare and precious resources of nature to care and cure. It’s a tradition of love passed down through generations bottled with love for your everyday nourishment and care.
+                At Dhrubotara, we inherited a rich legacy of having lovingly curated the rare and precious resources of nature to care and cure. It&apos;s a tradition of love passed down through generations bottled with love for your everyday nourishment and care.
               </p>
               <p>
-                Natural remedies, artisanal condiments, gourmet accents that are rich in the flavours of Bengal’s heritage and culture. Each one tried, tested and treasured.
+                Natural remedies, artisanal condiments, gourmet accents that are rich in the flavours of Bengal&apos;s heritage and culture. Each one tried, tested and treasured.
               </p>
               <p>
                 We source our ingredients from people who know nature the best and package them with extreme care to keep their natural richness intact. You deserve only the purest, the richest and the choiciest of all that nature has to offer.
@@ -49,6 +51,15 @@ export function About() {
               <p className="font-serif italic text-emerald-900 text-xl pt-2">
                 &ldquo;Dip into its bounty with every Dhrubotara product.&rdquo;
               </p>
+            </div>
+            <div className="mt-8">
+              <Link 
+                href="/story"
+                className="inline-flex items-center gap-2 bg-emerald-900 text-stone-50 px-6 py-3 rounded-sm font-sans text-sm tracking-wide hover:bg-emerald-800 transition-all cursor-pointer active:scale-95"
+              >
+                Read Our Full Story
+                <ArrowRight size={16} />
+              </Link>
             </div>
           </motion.div>
         </div>

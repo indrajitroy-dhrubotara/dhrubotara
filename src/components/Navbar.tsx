@@ -4,33 +4,53 @@ import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import Link from 'next/link';
 
-const NAV_ITEMS = ['Story', 'Products', 'Testimonials', 'Contact'];
+const NAV_ITEMS = [
+  { label: 'Story', href: '/story', isPage: true },
+  { label: 'Products', href: '/#products', isPage: false },
+  { label: 'Testimonials', href: '/#testimonials', isPage: false },
+  { label: 'Contact', href: '/#contact', isPage: false },
+];
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
 
-  const handleNavClick = (id: string) => {
+  const handleNavClick = (href: string, isPage: boolean) => {
     setIsOpen(false);
-    if (pathname !== '/') {
-      router.push('/');
-      setTimeout(() => {
-        const element = document.getElementById(id);
-        if (element) element.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
+    
+    if (isPage) {
+      // For page navigation, use router.push
+      router.push(href);
     } else {
-      const element = document.getElementById(id);
-      if (element) element.scrollIntoView({ behavior: 'smooth' });
+      // For hash navigation on home page
+      const targetId = href.replace('/#', '');
+      
+      if (pathname !== '/') {
+        router.push('/');
+        setTimeout(() => {
+          const element = document.getElementById(targetId);
+          if (element) element.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      } else {
+        const element = document.getElementById(targetId);
+        if (element) element.scrollIntoView({ behavior: 'smooth' });
+      }
     }
+  };
+
+  const handleLogoClick = () => {
+    setIsOpen(false);
+    router.push('/');
   };
 
   return (
     <nav className="fixed top-0 w-full z-50 bg-stone-50/80 backdrop-blur-md border-b border-stone-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
-          <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={() => handleNavClick('root')}>
+          <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={handleLogoClick}>
              {/* If we click logo, go top */}
             <span className="font-serif text-2xl text-emerald-950 tracking-wider">dhrubotara</span>
           </div>
@@ -38,11 +58,13 @@ export function Navbar() {
           <div className="hidden md:flex items-center space-x-8">
             {NAV_ITEMS.map((item) => (
               <button
-                key={item}
-                onClick={() => handleNavClick(item.toLowerCase())}
-                className="text-stone-600 hover:text-emerald-900 transition-colors font-sans text-sm tracking-wide uppercase bg-transparent border-none cursor-pointer"
+                key={item.label}
+                onClick={() => handleNavClick(item.href, item.isPage)}
+                className={`text-stone-600 hover:text-emerald-900 transition-colors font-sans text-sm tracking-wide uppercase bg-transparent border-none cursor-pointer ${
+                  pathname === item.href ? 'text-emerald-900 font-medium' : ''
+                }`}
               >
-                {item}
+                {item.label}
               </button>
             ))}
             <a 
@@ -79,11 +101,13 @@ export function Navbar() {
         <div className="px-4 pt-4 pb-8 space-y-2 flex flex-col items-center">
           {NAV_ITEMS.map((item) => (
              <button
-              key={item}
-              onClick={() => handleNavClick(item.toLowerCase())}
-              className="text-stone-600 hover:text-emerald-900 block px-6 py-3 text-lg font-medium w-full text-center active:bg-stone-100 rounded-sm bg-transparent border-none cursor-pointer"
+              key={item.label}
+              onClick={() => handleNavClick(item.href, item.isPage)}
+              className={`text-stone-600 hover:text-emerald-900 block px-6 py-3 text-lg font-medium w-full text-center active:bg-stone-100 rounded-sm bg-transparent border-none cursor-pointer ${
+                pathname === item.href ? 'text-emerald-900 font-medium' : ''
+              }`}
             >
-              {item}
+              {item.label}
             </button>
           ))}
           <a
