@@ -8,6 +8,7 @@ import { useProducts } from '@/lib/useProducts';
 import { useEffect } from 'react';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { FadeInImage } from '@/components/ui/FadeInImage';
+import { trackProductView, trackEvent } from '@/lib/analytics';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -20,6 +21,19 @@ export default function ProductDetailPage() {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [productId]);
+
+  // Track product view when product loads
+  useEffect(() => {
+    if (product) {
+      trackProductView({
+        id: product.id,
+        name: product.name,
+        category: product.tag,
+        price: product.price ? parseFloat(product.price.replace(/[^0-9.]/g, '')) : undefined,
+        currency: 'INR',
+      });
+    }
+  }, [product]);
 
   if (loading) {
     return (
@@ -129,6 +143,14 @@ export default function ProductDetailPage() {
                  target="_blank"
                  rel="noopener noreferrer"
                  className="block w-full sm:w-auto bg-emerald-950 text-stone-50 text-center px-8 py-4 rounded-sm font-sans tracking-wide hover:bg-emerald-900 transition-all active:scale-95 shadow-lg shadow-emerald-900/10 cursor-pointer no-underline flex items-center justify-center"
+                 onClick={() => {
+                   trackEvent('whatsapp_order_click', {
+                     product_id: product.id,
+                     product_name: product.name,
+                     product_price: product.price ? parseFloat(product.price.replace(/[^0-9.]/g, '')) : undefined,
+                     currency: 'INR',
+                   });
+                 }}
                >
                  <span className="mr-2 text-lg">💬</span> Order via WhatsApp
                </a>

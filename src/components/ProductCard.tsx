@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { FadeInImage } from './ui/FadeInImage';
+import { trackEvent } from '@/lib/analytics';
 
 interface ProductProps {
   id: string;
@@ -14,7 +15,21 @@ interface ProductProps {
 
 export function ProductCard({ id, name, description, image, tag, priority }: ProductProps) {
   return (
-    <Link href={`/product/${id}`} className="block">
+    <Link 
+      href={`/product/${id}`} 
+      className="block"
+      onClick={() => {
+        trackEvent('select_item', {
+          item_list_id: 'product_grid',
+          item_list_name: 'Product Collection',
+          items: [{
+            item_id: id,
+            item_name: name,
+            item_category: tag,
+          }],
+        });
+      }}
+    >
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}

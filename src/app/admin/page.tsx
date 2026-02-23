@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Phone, Lock, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
+import { trackLogin } from '@/lib/analytics';
 
 import { verifyAdmin } from '@/app/actions/auth';
 
@@ -84,6 +85,7 @@ export default function AdminLogin() {
     try {
       if (confirmationResult) {
         await confirmationResult.confirm(otp);
+        trackLogin('phone');
         router.push('/admin/dashboard');
       }
     } catch {
