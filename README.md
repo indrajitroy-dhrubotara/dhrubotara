@@ -71,3 +71,5 @@ export default defineConfig([
   },
 ])
 ```
+
+Was recently migrated to nextJS
