@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { FadeInImage } from './ui/FadeInImage';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 
 export function About() {
   return (
@@ -53,9 +54,10 @@ export function About() {
               </p>
             </div>
             <div className="mt-8">
-              <Link 
+              <Link
                 href="/story"
                 className="inline-flex items-center gap-2 bg-emerald-900 text-stone-50 px-6 py-3 rounded-sm font-sans text-sm tracking-wide hover:bg-emerald-800 transition-all cursor-pointer active:scale-95"
+                onClick={() => trackEvent('story_link_click', { source: 'about_section' })}
               >
                 Read Our Full Story
                 <ArrowRight size={16} />
