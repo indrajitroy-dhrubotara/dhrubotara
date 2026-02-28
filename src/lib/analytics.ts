@@ -6,14 +6,17 @@
  * - Use trackEvent() for custom events like product views, add to cart, purchases, etc.
  */
 
+type GTagParamValue = string | number | boolean | null | undefined | Record<string, unknown> | unknown[];
+type GTagParams = Record<string, GTagParamValue>;
+
 declare global {
   interface Window {
     gtag: (
       command: 'config' | 'event' | 'consent',
       targetId: string,
-      config?: Record<string, any>
+      config?: GTagParams
     ) => void;
-    dataLayer?: any[];
+    dataLayer?: unknown[];
   }
 }
 
@@ -56,7 +59,7 @@ declare global {
  */
 export function trackEvent(
   eventName: string,
-  params?: Record<string, any>
+  params?: GTagParams
 ): void {
   if (typeof window === 'undefined' || !window.gtag) {
     // Silently skip if GA is not loaded (e.g., during SSR or if blocked)
