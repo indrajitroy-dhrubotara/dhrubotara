@@ -1,4 +1,6 @@
+"use client";
 import { Mail, Phone, Instagram, Facebook } from 'lucide-react';
+import { trackEvent } from '@/lib/analytics';
 
 export function Footer() {
   return (
@@ -15,11 +17,19 @@ export function Footer() {
 
           <div className="flex flex-col items-center md:items-start space-y-4">
             <h4 className="font-serif text-lg text-stone-100 mb-2">Contact Us</h4>
-            <a href="mailto:hello@dhrubotara.com" className="flex items-center space-x-3 hover:text-white transition-colors">
+            <a
+              href="mailto:hello@dhrubotara.com"
+              className="flex items-center space-x-3 hover:text-white transition-colors"
+              onClick={() => trackEvent('contact_click', { method: 'email' })}
+            >
               <Mail size={18} />
               <span>hello@dhrubotara.com</span>
             </a>
-            <a href="tel:+919831574424" className="flex items-center space-x-3 hover:text-white transition-colors">
+            <a
+              href="tel:+919831574424"
+              className="flex items-center space-x-3 hover:text-white transition-colors"
+              onClick={() => trackEvent('contact_click', { method: 'phone' })}
+            >
               <Phone size={18} />
               <span>+91 98315 74424</span>
             </a>

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { trackEvent } from '@/lib/analytics';
 
 const NAV_ITEMS = [
   { label: 'Story', href: '/story', isPage: true },
@@ -18,8 +18,9 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  const handleNavClick = (href: string, isPage: boolean) => {
+  const handleNavClick = (href: string, isPage: boolean, label: string) => {
     setIsOpen(false);
+    trackEvent('navigation_click', { link_name: label.toLowerCase(), href });
     
     if (isPage) {
       // For page navigation, use router.push
@@ -59,7 +60,7 @@ export function Navbar() {
             {NAV_ITEMS.map((item) => (
               <button
                 key={item.label}
-                onClick={() => handleNavClick(item.href, item.isPage)}
+                onClick={() => handleNavClick(item.href, item.isPage, item.label)}
                 className={`text-stone-600 hover:text-emerald-900 transition-colors font-sans text-sm tracking-wide uppercase bg-transparent border-none cursor-pointer ${
                   pathname === item.href ? 'text-emerald-900 font-medium' : ''
                 }`}
@@ -67,11 +68,12 @@ export function Navbar() {
                 {item.label}
               </button>
             ))}
-            <a 
+            <a
               href="https://wa.me/919831574424?text=Hi%2C%20I%20would%20like%20to%20place%20an%20order."
               target="_blank"
               rel="noopener noreferrer"
               className="bg-emerald-900 text-stone-50 px-6 py-2 rounded-sm font-sans text-sm tracking-wide hover:bg-emerald-800 transition-all cursor-pointer active:scale-95 inline-block text-center no-underline"
+              onClick={() => trackEvent('whatsapp_click', { location: 'navbar_desktop' })}
             >
               Order via WhatsApp
             </a>
@@ -102,7 +104,7 @@ export function Navbar() {
           {NAV_ITEMS.map((item) => (
              <button
               key={item.label}
-              onClick={() => handleNavClick(item.href, item.isPage)}
+              onClick={() => handleNavClick(item.href, item.isPage, item.label)}
               className={`text-stone-600 hover:text-emerald-900 block px-6 py-3 text-lg font-medium w-full text-center active:bg-stone-100 rounded-sm bg-transparent border-none cursor-pointer ${
                 pathname === item.href ? 'text-emerald-900 font-medium' : ''
               }`}
@@ -115,6 +117,7 @@ export function Navbar() {
             target="_blank"
             rel="noopener noreferrer"
             className="w-full bg-emerald-950 text-stone-50 px-6 py-4 mt-6 rounded-sm font-sans text-base tracking-wide active:scale-95 transition-all text-center block cursor-pointer no-underline"
+            onClick={() => trackEvent('whatsapp_click', { location: 'navbar_mobile' })}
           >
             Order via WhatsApp
           </a>

@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import { Phone } from 'lucide-react';
 import { FadeInImage } from './ui/FadeInImage';
+import { trackEvent } from '@/lib/analytics';
 
 export function CustomHamper() {
   const products = [
@@ -53,16 +54,21 @@ export function CustomHamper() {
             </div>
 
             <div className="flex flex-col sm:flex-row gap-6 items-center">
-                <a 
-                  href="tel:9831574424" 
+                <a
+                  href="tel:9831574424"
                   className="flex items-center gap-3 bg-emerald-500 text-white px-8 py-3 rounded-full font-medium hover:bg-emerald-400 transition-colors duration-300 w-full sm:w-auto justify-center shadow-lg shadow-emerald-900/20"
+                  onClick={() => trackEvent('phone_call_click', { location: 'hamper_button' })}
                 >
                   <Phone className="w-5 h-5" />
                   Call to Customize
                 </a>
                 <div className="flex flex-col items-center sm:items-start">
                   <span className="text-xs text-emerald-400 uppercase tracking-widest mb-1">Direct Line</span>
-                  <a href="tel:9831574424" className="text-lg md:text-xl font-sans font-medium text-white hover:text-emerald-300 transition-colors select-all tracking-wider">
+                  <a
+                    href="tel:9831574424"
+                    className="text-lg md:text-xl font-sans font-medium text-white hover:text-emerald-300 transition-colors select-all tracking-wider"
+                    onClick={() => trackEvent('phone_call_click', { location: 'hamper_direct_number' })}
+                  >
                     +91 98315 74424
                   </a>
                 </div>

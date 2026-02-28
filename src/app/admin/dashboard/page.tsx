@@ -10,6 +10,7 @@ import { LogOut, Plus, Edit2, Trash2, Save, X, Upload, MessageSquare, Package, F
 import { type Product, type Testimonial } from '@/lib/types';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { trackEvent } from '@/lib/analytics';
 
 export default function AdminDashboard() {
   const { user, signOut, isAdmin, loading: authLoading } = useAuth();
@@ -46,6 +47,7 @@ export default function AdminDashboard() {
   }
 
   const handleLogout = async () => {
+    trackEvent('admin_logout');
     await signOut();
     router.push('/admin');
   };
@@ -77,6 +79,11 @@ export default function AdminDashboard() {
       setIsSaving(true);
       try {
         await saveProduct(editingProduct);
+        trackEvent('admin_action', {
+          action: editingProduct.id.startsWith('new-') ? 'create_product' : 'update_product',
+          product_id: editingProduct.id,
+          product_name: editingProduct.name,
+        });
         setIsFormOpen(false);
         setEditingProduct(null);
       } catch (err) {
@@ -91,6 +98,7 @@ export default function AdminDashboard() {
   const handleDeleteProduct = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
       await deleteProduct(id);
+      trackEvent('admin_action', { action: 'delete_product', product_id: id });
     }
   };
 
@@ -141,6 +149,11 @@ export default function AdminDashboard() {
       setIsSaving(true);
       try {
         await saveTestimonial(editingTestimonial);
+        trackEvent('admin_action', {
+          action: editingTestimonial.id.startsWith('new-') ? 'create_testimonial' : 'update_testimonial',
+          testimonial_id: editingTestimonial.id,
+          reviewer_name: editingTestimonial.name,
+        });
         setIsFormOpen(false);
         setEditingTestimonial(null);
       } catch (err) {
@@ -155,6 +168,7 @@ export default function AdminDashboard() {
   const handleDeleteTestimonial = async (id: string) => {
     if (window.confirm("Delete this testimonial?")) {
       await deleteTestimonial(id);
+      trackEvent('admin_action', { action: 'delete_testimonial', testimonial_id: id });
     }
   };
   
