@@ -11,10 +11,10 @@ export default async function Home() {
   return (
     <>
       <Hero />
-      <About />
       <ProductSection preloadedProducts={products} />
       <CustomHamper />
       <Testimonials />
+      <About />
     </>
   );
 }
