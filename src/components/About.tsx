@@ -36,6 +36,9 @@ export function About() {
             viewport={{ once: true }}
             transition={{ duration: 0.8 }}
           >
+            <span className="text-emerald-800 font-sans tracking-[0.2em] text-xs uppercase block mb-4">
+              Our Heritage
+            </span>
             <h2 className="font-serif text-4xl md:text-5xl text-emerald-950 mb-8">
               Our Story
             </h2>
@@ -49,9 +52,11 @@ export function About() {
               <p>
                 We source our ingredients from people who know nature the best and package them with extreme care to keep their natural richness intact. You deserve only the purest, the richest and the choiciest of all that nature has to offer.
               </p>
-              <p className="font-serif italic text-emerald-900 text-xl pt-2">
-                &ldquo;Dip into its bounty with every Dhrubotara product.&rdquo;
-              </p>
+              <blockquote className="border-l-2 border-emerald-700 pl-5 pt-2">
+                <p className="font-serif italic text-emerald-900 text-xl leading-relaxed">
+                  &ldquo;Dip into its bounty with every Dhrubotara product.&rdquo;
+                </p>
+              </blockquote>
             </div>
             <div className="mt-8">
               <Link
