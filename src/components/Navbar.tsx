@@ -63,11 +63,14 @@ export function Navbar() {
               <button
                 key={item.label}
                 onClick={() => handleNavClick(item.href, item.isPage, item.label)}
-                className={`text-stone-600 hover:text-emerald-900 transition-colors font-sans text-sm tracking-wide uppercase bg-transparent border-none cursor-pointer ${
+                className={`relative text-stone-600 hover:text-emerald-900 transition-colors font-sans text-sm tracking-wide uppercase bg-transparent border-none cursor-pointer group ${
                   pathname === item.href ? 'text-emerald-900 font-medium' : ''
                 }`}
               >
                 {item.label}
+                <span className={`absolute -bottom-1 left-0 h-px bg-emerald-800 transition-all duration-300 ${
+                  pathname === item.href ? 'w-full' : 'w-0 group-hover:w-full'
+                }`} />
               </button>
             ))}
             <a
