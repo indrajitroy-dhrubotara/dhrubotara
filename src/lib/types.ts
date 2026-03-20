@@ -21,3 +21,8 @@ export interface Testimonial {
   role?: string;
   image?: string;
 }
+
+export interface CategoryImage {
+  id: ProductCategory;
+  image: string;
+}
