@@ -7,7 +7,7 @@ import { useTestimonials } from '@/lib/useTestimonials';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { LogOut, Plus, Edit2, Trash2, Save, X, Upload, MessageSquare, Package, FileJson } from 'lucide-react';
-import { type Product, type Testimonial } from '@/lib/types';
+import { type Product, type Testimonial, type ProductCategory } from '@/lib/types';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { trackEvent } from '@/lib/analytics';
@@ -68,7 +68,8 @@ export default function AdminDashboard() {
       tag: '',
       price: '',
       features: [],
-      sortPriority: undefined
+      sortPriority: undefined,
+      productCategory: undefined,
     });
     setIsFormOpen(true);
   };
@@ -257,8 +258,8 @@ export default function AdminDashboard() {
                   <thead className="bg-stone-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Product</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider hidden sm:table-cell">Details</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider hidden sm:table-cell">Priority</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider hidden sm:table-cell">Category</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider hidden sm:table-cell">Tag / Priority</th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
@@ -277,12 +278,19 @@ export default function AdminDashboard() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500 hidden sm:table-cell">
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800">
-                            {product.tag}
-                          </span>
+                          {product.productCategory ? (
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800">
+                              {product.productCategory === 'condiments' ? 'Condiments' : product.productCategory === 'herbal' ? 'Herbal' : 'Rice & Other'}
+                            </span>
+                          ) : (
+                            <span className="text-stone-300 text-xs italic">Uncategorized</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500 hidden sm:table-cell">
-                          <span className="font-mono text-stone-600">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-stone-100 text-stone-600 mr-2">
+                            {product.tag}
+                          </span>
+                          <span className="font-mono text-stone-400 text-xs">
                             {product.sortPriority ?? '-'}
                           </span>
                         </td>
@@ -456,6 +464,22 @@ export default function AdminDashboard() {
                             placeholder="Higher = appears first"
                           />
                        </div>
+                    </div>
+                    <div>
+                       <label className="block text-sm font-medium text-stone-700 mb-1">Product Category</label>
+                       <select
+                         value={editingProduct.productCategory ?? ''}
+                         onChange={(e) => setEditingProduct({
+                           ...editingProduct,
+                           productCategory: (e.target.value as ProductCategory) || undefined
+                         })}
+                         className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500 bg-white text-stone-700"
+                       >
+                         <option value="">— Uncategorized —</option>
+                         <option value="condiments">Pickles &amp; Condiments</option>
+                         <option value="herbal">Herbal Medicines</option>
+                         <option value="rice-other">Rice &amp; Other Products</option>
+                       </select>
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-stone-700 mb-1">Image</label>

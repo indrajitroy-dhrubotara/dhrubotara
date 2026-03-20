@@ -1,3 +1,5 @@
+export type ProductCategory = 'condiments' | 'herbal' | 'rice-other';
+
 export interface Product {
   id: string;
   name: string;
@@ -8,6 +10,7 @@ export interface Product {
   price?: string;
   features: string[];
   sortPriority?: number;
+  productCategory?: ProductCategory;
 }
 
 export interface Testimonial {

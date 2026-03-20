@@ -9,7 +9,7 @@ const CATEGORIES = [
     subtitle: "Traditional Bengali Flavours",
     description:
       "Hand-crafted with age-old recipes — from tangy Aam Kasundi to rich Aam Gur, Shrimp Balachaung, and mixed vegetable pickles. Each jar carries the warmth of a Bengali kitchen.",
-    items: ["Aam Kasundi", "Aam Gur", "Mixed Vegetable Pickle", "Shrimp Balachaung"],
+    items: ["Aam Kasundi", "Aam Gur", "Mixed Vegetable Pickle", "Shrimp Balachaung", "Spiced Honey", "Desi Ghee"],
     icon: (
       <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-16 h-16">
         {/* Jar body */}
@@ -40,7 +40,7 @@ const CATEGORIES = [
     subtitle: "Ancient Totkas, Modern Wellness",
     description:
       "Rooted in the Vaidya tradition of Bengal, our remedies are drawn from yellowed notebook pages of healing wisdom — pure, time-tested mixtures for everyday wellness.",
-    items: ["Spiced Honey", "Desi Ghee", "Wellness Blends", "Natural Remedies"],
+    items: ["Wellness Blends", "Natural Remedies", "Herbal Tonics", "Totka Mixtures"],
     icon: (
       <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-16 h-16">
         {/* Mortar */}
