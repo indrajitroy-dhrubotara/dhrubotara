@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import { Menu, X } from 'lucide-react';
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { trackEvent } from '@/lib/analytics';
 
 const NAV_ITEMS = [
@@ -54,8 +55,14 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
           <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={handleLogoClick}>
-             {/* If we click logo, go top */}
-            <span className="font-serif text-2xl text-emerald-950 tracking-wider">dhrubotara</span>
+            <Image
+              src="/logo.png"
+              alt="Dhrubotara"
+              width={52}
+              height={52}
+              className="object-contain"
+              priority
+            />
           </div>
           
           <div className="hidden md:flex items-center space-x-8">

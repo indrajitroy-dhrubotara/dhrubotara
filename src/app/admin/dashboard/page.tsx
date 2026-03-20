@@ -6,19 +6,27 @@ import { useProducts } from '@/lib/useProducts';
 import { useTestimonials } from '@/lib/useTestimonials';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { LogOut, Plus, Edit2, Trash2, Save, X, Upload, MessageSquare, Package, FileJson } from 'lucide-react';
-import { type Product, type Testimonial } from '@/lib/types';
+import { LogOut, Plus, Edit2, Trash2, Save, X, Upload, MessageSquare, Package, FileJson, ImageIcon } from 'lucide-react';
+import { type Product, type Testimonial, type ProductCategory } from '@/lib/types';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { trackEvent } from '@/lib/analytics';
+import { useCategoryImages } from '@/lib/useCategoryImages';
 
 export default function AdminDashboard() {
   const { user, signOut, isAdmin, loading: authLoading } = useAuth();
   const { products, loading: pLoading, saveProduct, deleteProduct } = useProducts();
   const { testimonials, loading: tLoading, saveTestimonial, deleteTestimonial } = useTestimonials();
+  const { saveImage, getImage } = useCategoryImages();
   
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'products' | 'testimonials'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'testimonials' | 'categories'>('products');
+  const [categoryUploading, setCategoryUploading] = useState<ProductCategory | null>(null);
+  const categoryFileRefs = {
+    condiments: useRef<HTMLInputElement>(null),
+    herbal: useRef<HTMLInputElement>(null),
+    'rice-other': useRef<HTMLInputElement>(null),
+  } as const;
   
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
@@ -68,7 +76,8 @@ export default function AdminDashboard() {
       tag: '',
       price: '',
       features: [],
-      sortPriority: undefined
+      sortPriority: undefined,
+      productCategory: undefined,
     });
     setIsFormOpen(true);
   };
@@ -172,6 +181,28 @@ export default function AdminDashboard() {
     }
   };
   
+  // --- Category Image Upload ---
+  const handleCategoryImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, catId: ProductCategory) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCategoryUploading(catId);
+    try {
+      if (storage) {
+        const storageRef = ref(storage, `categories/${catId}_${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        await saveImage(catId, url);
+        trackEvent('admin_action', { action: 'update_category_image', category: catId });
+      }
+    } catch (err) {
+      console.error('Category image upload failed', err);
+      alert('Upload failed.');
+    } finally {
+      setCategoryUploading(null);
+      e.target.value = '';
+    }
+  };
+
   // --- Common ---
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -226,6 +257,12 @@ export default function AdminDashboard() {
            >
              <MessageSquare size={18} className="mr-2" /> Testimonials
            </button>
+           <button
+             onClick={() => setActiveTab('categories')}
+             className={`pb-4 text-sm font-medium flex items-center cursor-pointer transition-all active:scale-95 ${activeTab === 'categories' ? 'border-b-2 border-emerald-900 text-emerald-900' : 'text-stone-500 hover:text-stone-700'}`}
+           >
+             <ImageIcon size={18} className="mr-2" /> Category Images
+           </button>
         </div>
 
         {/* --- PRODUCTS TAB --- */}
@@ -257,8 +294,8 @@ export default function AdminDashboard() {
                   <thead className="bg-stone-50">
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Product</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider hidden sm:table-cell">Details</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider hidden sm:table-cell">Priority</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider hidden sm:table-cell">Category</th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase tracking-wider hidden sm:table-cell">Tag / Priority</th>
                       <th className="px-6 py-3 text-right text-xs font-medium text-stone-500 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
@@ -277,12 +314,19 @@ export default function AdminDashboard() {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500 hidden sm:table-cell">
-                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800">
-                            {product.tag}
-                          </span>
+                          {product.productCategory ? (
+                            <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-emerald-100 text-emerald-800">
+                              {product.productCategory === 'condiments' ? 'Condiments' : product.productCategory === 'herbal' ? 'Herbal' : 'Rice & Other'}
+                            </span>
+                          ) : (
+                            <span className="text-stone-300 text-xs italic">Uncategorized</span>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-stone-500 hidden sm:table-cell">
-                          <span className="font-mono text-stone-600">
+                          <span className="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-stone-100 text-stone-600 mr-2">
+                            {product.tag}
+                          </span>
+                          <span className="font-mono text-stone-400 text-xs">
                             {product.sortPriority ?? '-'}
                           </span>
                         </td>
@@ -342,6 +386,79 @@ export default function AdminDashboard() {
                 ))}
               </div>
             )}
+          </>
+        )}
+
+        {/* --- CATEGORIES TAB --- */}
+        {activeTab === 'categories' && (
+          <>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="font-serif text-2xl text-emerald-950">Category Images</h2>
+                <p className="text-stone-500 text-sm mt-1">Upload a photo for each category card shown on the homepage.</p>
+              </div>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-3">
+              {(
+                [
+                  { id: 'condiments' as ProductCategory, label: 'Pickles & Condiments' },
+                  { id: 'herbal' as ProductCategory, label: 'Herbal Medicines' },
+                  { id: 'rice-other' as ProductCategory, label: 'Rice & Other Products' },
+                ] as const
+              ).map((cat) => {
+                const existingImage = getImage(cat.id);
+                const isUploading = categoryUploading === cat.id;
+
+                return (
+                  <div key={cat.id} className="bg-white border border-stone-200 rounded-sm overflow-hidden shadow-sm">
+                    {/* Image preview */}
+                    <div className="relative aspect-[4/3] bg-stone-100">
+                      {existingImage ? (
+                        <Image
+                          src={existingImage}
+                          alt={cat.label}
+                          fill
+                          sizes="(max-width: 640px) 100vw, 33vw"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-stone-400">
+                          <ImageIcon size={32} className="mb-2 opacity-40" />
+                          <span className="text-xs font-sans tracking-wide">No image yet</span>
+                        </div>
+                      )}
+                      {isUploading && (
+                        <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-900" />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Card footer */}
+                    <div className="p-4">
+                      <p className="font-serif text-emerald-950 text-sm font-medium mb-3">{cat.label}</p>
+                      <button
+                        type="button"
+                        disabled={isUploading}
+                        onClick={() => categoryFileRefs[cat.id].current?.click()}
+                        className="w-full flex items-center justify-center gap-2 border border-stone-300 px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:border-emerald-700 hover:text-emerald-800 transition-all rounded-sm disabled:opacity-50 cursor-pointer active:scale-95"
+                      >
+                        <Upload size={15} />
+                        {existingImage ? 'Replace Image' : 'Upload Image'}
+                      </button>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={categoryFileRefs[cat.id]}
+                        className="hidden"
+                        onChange={(e) => handleCategoryImageUpload(e, cat.id)}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </>
         )}
       </main>
@@ -456,6 +573,22 @@ export default function AdminDashboard() {
                             placeholder="Higher = appears first"
                           />
                        </div>
+                    </div>
+                    <div>
+                       <label className="block text-sm font-medium text-stone-700 mb-1">Product Category</label>
+                       <select
+                         value={editingProduct.productCategory ?? ''}
+                         onChange={(e) => setEditingProduct({
+                           ...editingProduct,
+                           productCategory: (e.target.value as ProductCategory) || undefined
+                         })}
+                         className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500 bg-white text-stone-700"
+                       >
+                         <option value="">— Uncategorized —</option>
+                         <option value="condiments">Pickles &amp; Condiments</option>
+                         <option value="herbal">Herbal Medicines</option>
+                         <option value="rice-other">Rice &amp; Other Products</option>
+                       </select>
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-stone-700 mb-1">Image</label>
