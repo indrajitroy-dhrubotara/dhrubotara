@@ -35,8 +35,10 @@ export default function AdminDashboard() {
   const [isSeedOpen, setIsSeedOpen] = useState(false);
   const [seedJson, setSeedJson] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [testimonialUploading, setTestimonialUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const testimonialFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (authLoading) return;
@@ -200,6 +202,26 @@ export default function AdminDashboard() {
     } finally {
       setCategoryUploading(null);
       e.target.value = '';
+    }
+  };
+
+  // --- Testimonial Image Upload ---
+  const handleTestimonialImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editingTestimonial) return;
+    setTestimonialUploading(true);
+    try {
+      if (storage) {
+        const storageRef = ref(storage, `testimonials/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        setEditingTestimonial({ ...editingTestimonial, image: url });
+      }
+    } catch (err) {
+      console.error("Upload failed", err);
+      alert("Upload failed.");
+    } finally {
+      setTestimonialUploading(false);
     }
   };
 
@@ -696,7 +718,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                        <label className="block text-sm font-medium text-stone-700 mb-1">Testimonial Text</label>
-                       <textarea 
+                       <textarea
                          rows={4}
                          required
                          value={editingTestimonial.text}
@@ -704,18 +726,61 @@ export default function AdminDashboard() {
                          className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
                        />
                     </div>
+                    <div>
+                      <label className="block text-sm font-medium text-stone-700 mb-1">Reviewer Photo (optional)</label>
+                      <div className="flex items-center space-x-4">
+                        <div className="w-14 h-14 rounded-full overflow-hidden bg-emerald-900 flex items-center justify-center flex-shrink-0">
+                          {editingTestimonial.image ? (
+                            <div className="relative w-14 h-14">
+                              <Image src={editingTestimonial.image} alt="Preview" fill sizes="56px" className="object-cover rounded-full" />
+                            </div>
+                          ) : (
+                            <span className="text-stone-50 font-serif text-xl">
+                              {editingTestimonial.name.charAt(0) || '?'}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-2">
+                          <button
+                            type="button"
+                            disabled={testimonialUploading}
+                            onClick={() => testimonialFileInputRef.current?.click()}
+                            className="px-4 py-2 border border-stone-300 rounded-sm text-sm font-medium text-stone-700 hover:bg-stone-50 flex items-center cursor-pointer disabled:opacity-50"
+                          >
+                            <Upload size={15} className="mr-2" />
+                            {testimonialUploading ? 'Uploading...' : editingTestimonial.image ? 'Change Photo' : 'Upload Photo'}
+                          </button>
+                          {editingTestimonial.image && (
+                            <button
+                              type="button"
+                              onClick={() => setEditingTestimonial({ ...editingTestimonial, image: undefined })}
+                              className="text-xs text-red-400 hover:text-red-600 text-left cursor-pointer"
+                            >
+                              Remove photo
+                            </button>
+                          )}
+                        </div>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          ref={testimonialFileInputRef}
+                          className="hidden"
+                          onChange={handleTestimonialImageUpload}
+                        />
+                      </div>
+                    </div>
                     <div className="pt-4 border-t border-stone-100 flex justify-end space-x-3">
-                       <button 
-                         type="button" 
-                         disabled={isSaving}
-                         onClick={() => { setIsFormOpen(false); setEditingTestimonial(null); }} 
+                       <button
+                         type="button"
+                         disabled={isSaving || testimonialUploading}
+                         onClick={() => { setIsFormOpen(false); setEditingTestimonial(null); }}
                          className="px-4 py-2 text-stone-600 hover:text-stone-800 disabled:opacity-50 cursor-pointer active:scale-95 transition-all"
                        >
                          Cancel
                        </button>
-                       <button 
-                         type="submit" 
-                         disabled={isSaving}
+                       <button
+                         type="submit"
+                         disabled={isSaving || testimonialUploading}
                          className="px-6 py-2 bg-emerald-900 text-white rounded-sm hover:bg-emerald-800 shadow-sm flex items-center disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer active:scale-95 transition-all"
                        >
                          {isSaving ? "Saving..." : <><Save size={18} className="mr-2" /> Save</>}
