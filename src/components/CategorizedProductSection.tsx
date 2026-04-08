@@ -121,10 +121,14 @@ function normalizeCategoryValue(value: string): ProductCategory | undefined {
       "rice and other",
       "rice other products",
       "rice and other products",
+      "other products",
+      "others",
+      "other",
       "riceothers",
       "riceother",
     ].includes(normalized) ||
-    normalized.includes("rice")
+    normalized.includes("rice") ||
+    normalized.includes("other product")
   ) {
     return "rice-other";
   }
