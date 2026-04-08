@@ -117,8 +117,6 @@ export function Testimonials() {
                     ) : (
                       t.name.charAt(0)
                     )}
-                  <div className="w-10 h-10 rounded-full bg-emerald-900 text-stone-50 flex items-center justify-center font-serif text-lg mr-3 flex-shrink-0">
-                    {t.name.charAt(0)}
                   </div>
                   <div>
                     <h4 className="font-sans font-medium text-emerald-950 text-sm">
