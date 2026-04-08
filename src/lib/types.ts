@@ -11,6 +11,9 @@ export interface Product {
   features: string[];
   sortPriority?: number;
   productCategory?: ProductCategory;
+  // Legacy field kept for backward compatibility with older Firestore docs
+  // (historically stored with inconsistent labels)
+  category?: string;
 }
 
 export interface Testimonial {
