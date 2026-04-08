@@ -78,32 +78,32 @@ interface Props {
   preloadedProducts?: Product[] | null;
 }
 
+const CATEGORY_ALIASES: Record<string, ProductCategory> = {
+  condiments: "condiments",
+  pickle: "condiments",
+  pickles: "condiments",
+  picklescondiments: "condiments",
+  picklesandcondiments: "condiments",
+
+  herbal: "herbal",
+  herbals: "herbal",
+  herbalmedicine: "herbal",
+  herbalmedicines: "herbal",
+  naturalremedy: "herbal",
+  naturalremedies: "herbal",
+  remedy: "herbal",
+  remedies: "herbal",
+
+  riceother: "rice-other",
+  riceothers: "rice-other",
+  riceandother: "rice-other",
+  riceotherproducts: "rice-other",
+  riceandotherproducts: "rice-other",
+  otherproducts: "rice-other",
+};
+
 function normalizeCategoryValue(value: string): ProductCategory | undefined {
-  const normalized = value
-    .trim()
-    .toLowerCase()
-    .replace(/&/g, " and ")
-    .replace(/[^a-z0-9]+/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  const compact = normalized.replace(/\s+/g, "");
-
-  if (
-    ["condiments", "pickle", "pickles", "pickles condiments", "pickles and condiments"].includes(normalized) ||
-    normalized.includes("pickle") ||
-    normalized.includes("condiment")
-  ) {
-    return "condiments";
-  }
-
-  if (
-    [
-      "herbal",
-      "herbals",
-      "herbal medicine",
-      "herbal medicines",
-      "natural remedies",
-      "natural remedy",
+  return CATEGORY_ALIASES[aliasKey];
       "remedies",
       "remedy",
     ].includes(normalized) ||
