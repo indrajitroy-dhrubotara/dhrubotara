@@ -78,6 +78,52 @@ interface Props {
   preloadedProducts?: Product[] | null;
 }
 
+const CATEGORY_ALIASES: Record<string, ProductCategory> = {
+  condiments: "condiments",
+  pickle: "condiments",
+  pickles: "condiments",
+  picklescondiments: "condiments",
+  picklesandcondiments: "condiments",
+
+  herbal: "herbal",
+  herbals: "herbal",
+  herbalmedicine: "herbal",
+  herbalmedicines: "herbal",
+  naturalremedy: "herbal",
+  naturalremedies: "herbal",
+  remedy: "herbal",
+  remedies: "herbal",
+
+  riceother: "rice-other",
+  riceothers: "rice-other",
+  riceandother: "rice-other",
+  riceotherproducts: "rice-other",
+  riceandotherproducts: "rice-other",
+  otherproducts: "rice-other",
+};
+
+function normalizeCategoryValue(value: string): ProductCategory | undefined {
+  const aliasKey = value
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, "and")
+    .replace(/[^a-z0-9]+/g, "");
+
+  return CATEGORY_ALIASES[aliasKey];
+}
+
+function resolveProductCategory(product: Product): ProductCategory | undefined {
+  const candidates = [product.productCategory, product.category];
+
+  for (const candidate of candidates) {
+    if (typeof candidate !== "string" || !candidate.trim()) continue;
+    const resolved = normalizeCategoryValue(candidate);
+    if (resolved) return resolved;
+  }
+
+  return undefined;
+}
+
 export function CategorizedProductSection({ preloadedProducts }: Props) {
   const { products, loading } = useProducts(preloadedProducts);
 
@@ -85,7 +131,10 @@ export function CategorizedProductSection({ preloadedProducts }: Props) {
     <div id="products">
       {CATEGORIES.map((cat, catIndex) => {
         const isDark = cat.id === "herbal";
-        const catProducts = products.filter((p) => p.productCategory === cat.id);
+        const catProducts = products.filter((p) => {
+          const resolvedCategory = resolveProductCategory(p);
+          return resolvedCategory === cat.id;
+        });
 
         return (
           <section
