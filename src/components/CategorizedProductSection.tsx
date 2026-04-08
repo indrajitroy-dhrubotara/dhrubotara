@@ -78,6 +78,72 @@ interface Props {
   preloadedProducts?: Product[] | null;
 }
 
+function normalizeCategoryValue(value: string): ProductCategory | undefined {
+  const normalized = value
+    .trim()
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+  const compact = normalized.replace(/\s+/g, "");
+
+  if (
+    ["condiments", "pickle", "pickles", "pickles condiments", "pickles and condiments"].includes(normalized) ||
+    normalized.includes("pickle") ||
+    normalized.includes("condiment")
+  ) {
+    return "condiments";
+  }
+
+  if (
+    [
+      "herbal",
+      "herbals",
+      "herbal medicine",
+      "herbal medicines",
+      "natural remedies",
+      "natural remedy",
+      "remedies",
+      "remedy",
+    ].includes(normalized) ||
+    normalized.includes("herbal") ||
+    normalized.includes("remed") ||
+    compact === "herbalmedicine" ||
+    compact === "herbalmedicines"
+  ) {
+    return "herbal";
+  }
+
+  if (
+    [
+      "rice other",
+      "rice and other",
+      "rice other products",
+      "rice and other products",
+      "riceothers",
+      "riceother",
+    ].includes(normalized) ||
+    normalized.includes("rice")
+  ) {
+    return "rice-other";
+  }
+
+  return undefined;
+}
+
+function resolveProductCategory(product: Product): ProductCategory | undefined {
+  const candidates = [product.productCategory, product.category];
+
+  for (const candidate of candidates) {
+    if (typeof candidate !== "string" || !candidate.trim()) continue;
+    const resolved = normalizeCategoryValue(candidate);
+    if (resolved) return resolved;
+  }
+
+  return undefined;
+}
+
 export function CategorizedProductSection({ preloadedProducts }: Props) {
   const { products, loading } = useProducts(preloadedProducts);
 
@@ -85,7 +151,10 @@ export function CategorizedProductSection({ preloadedProducts }: Props) {
     <div id="products">
       {CATEGORIES.map((cat, catIndex) => {
         const isDark = cat.id === "herbal";
-        const catProducts = products.filter((p) => p.productCategory === cat.id);
+        const catProducts = products.filter((p) => {
+          const resolvedCategory = resolveProductCategory(p);
+          return resolvedCategory === cat.id;
+        });
 
         return (
           <section
