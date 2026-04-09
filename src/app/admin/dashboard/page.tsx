@@ -74,7 +74,7 @@ export default function AdminDashboard() {
       name: '',
       description: '',
       longDescription: '',
-      image: 'https://picsum.photos/seed/new/800/800',
+      image: '/hamper.png',
       tag: '',
       price: '',
       features: [],
