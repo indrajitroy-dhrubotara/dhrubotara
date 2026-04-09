@@ -104,7 +104,7 @@ export default function AdminLogin() {
       >
         <div className="text-center mb-8">
           <span className="font-serif text-2xl text-emerald-950 tracking-wider">dhrubotara</span>
-          <p className="text-stone-500 font-sans text-xs uppercase tracking-widest mt-2">Admin Access</p>
+	          <p className="text-stone-500 font-sans text-xs uppercase tracking-widest mt-2">Codex Admin Access</p>
         </div>
 
         {error && (

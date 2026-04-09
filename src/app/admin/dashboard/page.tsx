@@ -258,7 +258,7 @@ export default function AdminDashboard() {
       {/* Admin Header */}
       <header className="bg-emerald-950 text-stone-100 shadow-md sticky top-0 z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex justify-between items-center">
-          <span className="font-serif text-xl tracking-wider">dhrubotara <span className="text-emerald-400 text-sm font-sans tracking-normal ml-2">Admin</span></span>
+	          <span className="font-serif text-xl tracking-wider">dhrubotara <span className="text-emerald-400 text-sm font-sans tracking-normal ml-2">Codex Admin</span></span>
           <div className="flex items-center space-x-4">
              <span className="text-xs text-stone-400 hidden sm:inline">
                {user?.phoneNumber || "Demo User"}
