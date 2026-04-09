@@ -14,8 +14,6 @@ export interface Product {
   // Legacy field kept for backward compatibility with older Firestore docs
   // (historically stored with inconsistent labels)
   category?: string;
-  // Legacy field kept for backward compatibility with older Firestore docs.
-  features?: string[];
 }
 
 export interface Testimonial {
