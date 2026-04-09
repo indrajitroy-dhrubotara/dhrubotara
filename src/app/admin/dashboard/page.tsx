@@ -77,7 +77,7 @@ export default function AdminDashboard() {
       image: 'https://picsum.photos/seed/new/800/800',
       tag: '',
       price: '',
-      features: [],
+      codex: [],
       sortPriority: undefined,
       productCategory: undefined,
     });
