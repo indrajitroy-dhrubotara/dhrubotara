@@ -39,6 +39,7 @@ export default function AdminDashboard() {
   const [isSaving, setIsSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const testimonialFileInputRef = useRef<HTMLInputElement>(null);
+  const yieldForPaint = () => new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
 
   useEffect(() => {
     if (authLoading) return;
@@ -92,6 +93,7 @@ export default function AdminDashboard() {
       setIsFormOpen(false);
       setEditingProduct(null);
       try {
+        await yieldForPaint();
         await saveProduct(productToSave, { refresh: false });
         trackEvent('admin_action', {
           action: productToSave.id.startsWith('new-') ? 'create_product' : 'update_product',
@@ -111,6 +113,7 @@ export default function AdminDashboard() {
 
   const handleDeleteProduct = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
+      await yieldForPaint();
       await deleteProduct(id, { refresh: false });
       trackEvent('admin_action', { action: 'delete_product', product_id: id });
     }
@@ -122,11 +125,12 @@ export default function AdminDashboard() {
     try {
         const data = JSON.parse(seedJson);
         if (!Array.isArray(data)) throw new Error("JSON must be an array of products");
+        await yieldForPaint();
         
         // Process sequentially to avoid overwhelming rate limits if any
         let count = 0;
         for (const item of data) {
-            await saveProduct(item, { refresh: false });
+            await saveProduct(item, { refresh: false, optimistic: false });
             count++;
         }
         void refreshProducts();
@@ -166,6 +170,7 @@ export default function AdminDashboard() {
       setIsFormOpen(false);
       setEditingTestimonial(null);
       try {
+        await yieldForPaint();
         await saveTestimonial(testimonialToSave, { refresh: false });
         trackEvent('admin_action', {
           action: testimonialToSave.id.startsWith('new-') ? 'create_testimonial' : 'update_testimonial',
@@ -185,6 +190,7 @@ export default function AdminDashboard() {
 
   const handleDeleteTestimonial = async (id: string) => {
     if (window.confirm("Delete this testimonial?")) {
+      await yieldForPaint();
       await deleteTestimonial(id, { refresh: false });
       trackEvent('admin_action', { action: 'delete_testimonial', testimonial_id: id });
     }

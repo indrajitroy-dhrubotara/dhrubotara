@@ -4,6 +4,7 @@ import { collection, getDocs, doc, setDoc, deleteDoc } from 'firebase/firestore'
 
 interface MutationOptions {
   refresh?: boolean;
+  optimistic?: boolean;
 }
 
 export function useCollection<T extends { id: string }>(
@@ -65,17 +66,19 @@ export function useCollection<T extends { id: string }>(
     const itemRef = doc(collection(db, collectionName), item.id);
     await setDoc(itemRef, item, { merge: true });
 
-    // Optimistic local update for faster UI response
-    setData((prev) => {
-      const existingIndex = prev.findIndex((p) => p.id === item.id);
-      if (existingIndex === -1) {
-        return applySort([...prev, item]);
-      }
+    if (options?.optimistic ?? true) {
+      // Optimistic local update for faster UI response
+      setData((prev) => {
+        const existingIndex = prev.findIndex((p) => p.id === item.id);
+        if (existingIndex === -1) {
+          return applySort([...prev, item]);
+        }
 
-      const next = [...prev];
-      next[existingIndex] = { ...next[existingIndex], ...item };
-      return applySort(next);
-    });
+        const next = [...prev];
+        next[existingIndex] = { ...next[existingIndex], ...item };
+        return applySort(next);
+      });
+    }
 
     if (options?.refresh ?? true) {
       await fetchData();
