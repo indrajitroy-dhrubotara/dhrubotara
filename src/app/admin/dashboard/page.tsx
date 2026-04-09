@@ -15,8 +15,8 @@ import { useCategoryImages } from '@/lib/useCategoryImages';
 
 export default function AdminDashboard() {
   const { user, signOut, isAdmin, loading: authLoading } = useAuth();
-  const { products, loading: pLoading, saveProduct, deleteProduct } = useProducts();
-  const { testimonials, loading: tLoading, saveTestimonial, deleteTestimonial } = useTestimonials();
+  const { products, loading: pLoading, saveProduct, deleteProduct, refresh: refreshProducts } = useProducts();
+  const { testimonials, loading: tLoading, saveTestimonial, deleteTestimonial, refresh: refreshTestimonials } = useTestimonials();
   const { saveImage, getImage } = useCategoryImages();
   
   const router = useRouter();
@@ -88,15 +88,17 @@ export default function AdminDashboard() {
     e.preventDefault();
     if (editingProduct) {
       setIsSaving(true);
+      const productToSave = editingProduct;
+      setIsFormOpen(false);
+      setEditingProduct(null);
       try {
-        await saveProduct(editingProduct);
+        await saveProduct(productToSave, { refresh: false });
         trackEvent('admin_action', {
-          action: editingProduct.id.startsWith('new-') ? 'create_product' : 'update_product',
-          product_id: editingProduct.id,
-          product_name: editingProduct.name,
+          action: productToSave.id.startsWith('new-') ? 'create_product' : 'update_product',
+          product_id: productToSave.id,
+          product_name: productToSave.name,
         });
-        setIsFormOpen(false);
-        setEditingProduct(null);
+        void refreshProducts();
       } catch (err) {
         console.error(err);
         alert("Failed to save product.");
@@ -108,7 +110,8 @@ export default function AdminDashboard() {
 
   const handleDeleteProduct = async (id: string) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
-      await deleteProduct(id);
+      await deleteProduct(id, { refresh: false });
+      void refreshProducts();
       trackEvent('admin_action', { action: 'delete_product', product_id: id });
     }
   };
@@ -123,9 +126,10 @@ export default function AdminDashboard() {
         // Process sequentially to avoid overwhelming rate limits if any
         let count = 0;
         for (const item of data) {
-            await saveProduct(item);
+            await saveProduct(item, { refresh: false });
             count++;
         }
+        void refreshProducts();
         alert(`Successfully seeded ${count} products.`);
         setIsSeedOpen(false);
         setSeedJson('');
@@ -158,15 +162,17 @@ export default function AdminDashboard() {
     e.preventDefault();
     if (editingTestimonial) {
       setIsSaving(true);
+      const testimonialToSave = editingTestimonial;
+      setIsFormOpen(false);
+      setEditingTestimonial(null);
       try {
-        await saveTestimonial(editingTestimonial);
+        await saveTestimonial(testimonialToSave, { refresh: false });
         trackEvent('admin_action', {
-          action: editingTestimonial.id.startsWith('new-') ? 'create_testimonial' : 'update_testimonial',
-          testimonial_id: editingTestimonial.id,
-          reviewer_name: editingTestimonial.name,
+          action: testimonialToSave.id.startsWith('new-') ? 'create_testimonial' : 'update_testimonial',
+          testimonial_id: testimonialToSave.id,
+          reviewer_name: testimonialToSave.name,
         });
-        setIsFormOpen(false);
-        setEditingTestimonial(null);
+        void refreshTestimonials();
       } catch (err) {
         console.error(err);
         alert("Failed to save testimonial.");
@@ -178,7 +184,8 @@ export default function AdminDashboard() {
 
   const handleDeleteTestimonial = async (id: string) => {
     if (window.confirm("Delete this testimonial?")) {
-      await deleteTestimonial(id);
+      await deleteTestimonial(id, { refresh: false });
+      void refreshTestimonials();
       trackEvent('admin_action', { action: 'delete_testimonial', testimonial_id: id });
     }
   };
