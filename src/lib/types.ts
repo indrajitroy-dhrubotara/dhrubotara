@@ -8,7 +8,7 @@ export interface Product {
   image: string;
   tag: string;
   price?: string;
-  features: string[];
+  codex: string[];
   sortPriority?: number;
   productCategory?: ProductCategory;
   // Legacy field kept for backward compatibility with older Firestore docs

@@ -126,12 +126,12 @@ export default function ProductDetailPage() {
             <div className="mb-10">
               <h3 className="font-serif text-lg text-emerald-950 mb-4">Key Highlights</h3>
               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {product.features.map((feature, index) => (
+                {product.codex.map((codexItem, index) => (
                   <li key={index} className="flex items-center text-stone-600 font-sans text-sm">
                     <span className="bg-emerald-100 text-emerald-800 p-1 rounded-full mr-3">
                       <Check size={14} />
                     </span>
-                    {feature}
+                    {codexItem}
                   </li>
                 ))}
               </ul>
