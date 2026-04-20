@@ -1,5 +1,6 @@
 "use client";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { useTestimonials } from "../lib/useTestimonials";
 import { Skeleton } from "./ui/Skeleton";
 
@@ -104,8 +105,18 @@ export function Testimonials() {
                 </div>
 
                 <div className="flex items-center mt-4 pt-4 border-t border-stone-100">
-                  <div className="w-10 h-10 rounded-full bg-emerald-900 text-stone-50 flex items-center justify-center font-serif text-lg mr-3 flex-shrink-0">
-                    {t.name.charAt(0)}
+                  <div className="w-10 h-10 rounded-full bg-emerald-900 text-stone-50 flex items-center justify-center font-serif text-lg mr-3 flex-shrink-0 overflow-hidden relative">
+                    {t.image ? (
+                      <Image
+                        src={t.image}
+                        alt={t.name}
+                        fill
+                        sizes="40px"
+                        className="object-cover"
+                      />
+                    ) : (
+                      t.name.charAt(0)
+                    )}
                   </div>
                   <div>
                     <h4 className="font-sans font-medium text-emerald-950 text-sm">

@@ -123,19 +123,24 @@ export default function ProductDetailPage() {
               <p>{product.longDescription}</p>
             </div>
 
-            <div className="mb-10">
-              <h3 className="font-serif text-lg text-emerald-950 mb-4">Key Highlights</h3>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {product.features.map((feature, index) => (
-                  <li key={index} className="flex items-center text-stone-600 font-sans text-sm">
-                    <span className="bg-emerald-100 text-emerald-800 p-1 rounded-full mr-3">
-                      <Check size={14} />
-                    </span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {(() => {
+              const highlights = product.features ?? product.codex ?? [];
+              return highlights.length > 0 ? (
+                <div className="mb-10">
+                  <h3 className="font-serif text-lg text-emerald-950 mb-4">Key Highlights</h3>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {highlights.map((feature, index) => (
+                      <li key={index} className="flex items-center text-stone-600 font-sans text-sm">
+                        <span className="bg-emerald-100 text-emerald-800 p-1 rounded-full mr-3">
+                          <Check size={14} />
+                        </span>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null;
+            })()}
 
             <div className="pt-8 border-t border-stone-200">
                <a 

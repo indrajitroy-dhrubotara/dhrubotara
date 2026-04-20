@@ -1,3 +1,5 @@
+export type ProductCategory = 'condiments' | 'herbal' | 'rice-other';
+
 export interface Product {
   id: string;
   name: string;
@@ -6,8 +8,14 @@ export interface Product {
   image: string;
   tag: string;
   price?: string;
-  features: string[];
+  features?: string[];
+  // Legacy field name used by codex branch — treated as alias for features
+  codex?: string[];
   sortPriority?: number;
+  productCategory?: ProductCategory;
+  // Legacy field kept for backward compatibility with older Firestore docs
+  // (historically stored with inconsistent labels)
+  category?: string;
 }
 
 export interface Testimonial {
@@ -17,4 +25,9 @@ export interface Testimonial {
   category?: string;
   role?: string;
   image?: string;
+}
+
+export interface CategoryImage {
+  id: ProductCategory;
+  image: string;
 }
