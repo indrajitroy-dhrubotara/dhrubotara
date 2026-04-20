@@ -12,6 +12,7 @@ import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { trackEvent } from '@/lib/analytics';
 import { useCategoryImages } from '@/lib/useCategoryImages';
+import { isFirebaseConfigured } from '@/lib/firebase';
 
 export default function AdminDashboard() {
   const { user, signOut, isAdmin, loading: authLoading } = useAuth();
@@ -99,7 +100,8 @@ export default function AdminDashboard() {
         setEditingProduct(null);
       } catch (err) {
         console.error(err);
-        alert("Failed to save product.");
+        const msg = err instanceof Error ? err.message : String(err);
+        alert(`Failed to save product.\n\n${msg}`);
       } finally {
         setIsSaving(false);
       }
@@ -198,7 +200,8 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error('Category image upload failed', err);
-      alert('Upload failed.');
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Upload failed.\n\n${msg}`);
     } finally {
       setCategoryUploading(null);
       e.target.value = '';
@@ -219,7 +222,8 @@ export default function AdminDashboard() {
       }
     } catch (err) {
       console.error("Upload failed", err);
-      alert("Upload failed.");
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Upload failed.\n\n${msg}`);
     } finally {
       setTestimonialUploading(false);
     }
@@ -240,7 +244,8 @@ export default function AdminDashboard() {
         }
     } catch (err) {
         console.error("Upload failed", err);
-        alert("Upload failed.");
+        const msg = err instanceof Error ? err.message : String(err);
+        alert(`Upload failed.\n\n${msg}`);
     } finally {
         setUploading(false);
     }
@@ -264,6 +269,12 @@ export default function AdminDashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {!isFirebaseConfigured && (
+          <div className="mb-6 bg-red-50 border border-red-200 rounded-sm px-5 py-4 text-sm text-red-800">
+            <strong className="font-semibold">Firebase not configured.</strong> Saves and uploads will fail until you add your Firebase credentials.{' '}
+            Create a <code className="bg-red-100 px-1 rounded">.env.local</code> file with your <code className="bg-red-100 px-1 rounded">NEXT_PUBLIC_FIREBASE_*</code> values, then restart the dev server.
+          </div>
+        )}
         
         {/* Tabs */}
         <div className="flex space-x-8 border-b border-stone-200 mb-8">
