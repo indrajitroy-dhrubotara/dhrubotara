@@ -8,7 +8,9 @@ export interface Product {
   image: string;
   tag: string;
   price?: string;
-  features: string[];
+  features?: string[];
+  // Legacy field name used by codex branch — treated as alias for features
+  codex?: string[];
   sortPriority?: number;
   productCategory?: ProductCategory;
   // Legacy field kept for backward compatibility with older Firestore docs
