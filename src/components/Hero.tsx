@@ -37,7 +37,7 @@ const STATS = [
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#F5F5F0]">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#FBF6E9]">
       {/* Texture overlay */}
       <div className="absolute inset-0 bg-noise opacity-40 pointer-events-none" />
 

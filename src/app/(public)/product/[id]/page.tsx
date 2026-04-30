@@ -37,7 +37,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-stone-50 pt-24 pb-16">
+      <div className="min-h-screen bg-[#FBF6E9] pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
            <Skeleton className="h-6 w-32 mb-8" />
            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
@@ -62,7 +62,7 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50">
+      <div className="min-h-screen flex items-center justify-center bg-[#FBF6E9]">
         <div className="text-center">
           <h2 className="font-serif text-3xl text-emerald-950 mb-4">Product Not Found</h2>
           <Link href="/" className="text-emerald-800 hover:text-emerald-600 underline">Return Home</Link>
@@ -72,7 +72,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 pt-24 pb-16">
+    <div className="min-h-screen bg-[#FBF6E9] pt-24 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <Link href="/" className="inline-flex items-center text-stone-500 hover:text-emerald-900 mb-8 transition-colors group">

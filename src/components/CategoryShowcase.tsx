@@ -38,7 +38,7 @@ const CATEGORIES: {
         <path d="M48 14 L54 18" stroke="currentColor" strokeWidth="1" opacity="0.4" />
       </svg>
     ),
-    bg: "bg-[#F5F5F0]",
+    bg: "bg-[#FBF6E9]",
     accentText: "text-amber-800",
     accentDot: "bg-amber-700",
   },
@@ -92,7 +92,7 @@ const CATEGORIES: {
         <ellipse cx="32" cy="50" rx="18" ry="3" fill="currentColor" opacity="0.1" />
       </svg>
     ),
-    bg: "bg-[#F5F5F0]",
+    bg: "bg-[#FBF6E9]",
     accentText: "text-stone-600",
     accentDot: "bg-stone-500",
   },
@@ -102,7 +102,7 @@ export function CategoryShowcase() {
   const { getImage } = useCategoryImages();
 
   return (
-    <section className="py-16 md:py-24 bg-white border-b border-stone-100">
+    <section className="py-16 md:py-24 bg-[#FBF6E9] border-b border-stone-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <motion.div

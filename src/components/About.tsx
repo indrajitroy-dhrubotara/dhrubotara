@@ -7,7 +7,7 @@ import { trackEvent } from '@/lib/analytics';
 
 export function About() {
   return (
-    <section id="story" className="py-16 md:py-24 bg-white overflow-hidden border-b border-stone-100">
+    <section id="story" className="py-16 md:py-24 bg-[#FBF6E9] overflow-hidden border-b border-stone-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
           <motion.div

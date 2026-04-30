@@ -21,7 +21,7 @@ const CATEGORIES: CategoryConfig[] = [
     title: "Pickles & Condiments",
     description:
       "Hand-crafted with age-old Bengali recipes — tangy, spiced, and rich with tradition. Perfect companions for every meal.",
-    bg: "bg-[#F5F5F0]",
+    bg: "bg-[#FBF6E9]",
     eyebrow: "text-amber-800",
   },
   {
@@ -39,7 +39,7 @@ const CATEGORIES: CategoryConfig[] = [
     title: "Rice & Other Products",
     description:
       "Artisanal pantry staples — Bori, Choshi, and seasonal specialties crafted by skilled women of Bengal's villages.",
-    bg: "bg-white",
+    bg: "bg-[#FBF6E9]",
     eyebrow: "text-stone-500",
   },
 ];

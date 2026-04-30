@@ -31,7 +31,7 @@ export function Testimonials() {
   const { testimonials, loading } = useTestimonials();
 
   return (
-    <section id="testimonials" className="py-24 bg-stone-50 border-t border-stone-200">
+    <section id="testimonials" className="py-24 bg-[#FBF6E9] border-t border-stone-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <div className="text-center max-w-3xl mx-auto mb-16">

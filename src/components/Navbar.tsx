@@ -112,7 +112,7 @@ export function Navbar() {
           open: { opacity: 1, height: "auto" },
           closed: { opacity: 0, height: 0 }
         }}
-        className="md:hidden overflow-hidden bg-stone-50 border-b border-stone-200"
+        className="md:hidden overflow-hidden bg-[#FBF6E9] border-b border-stone-200"
       >
         <div className="px-4 pt-4 pb-8 space-y-2 flex flex-col items-center">
           {NAV_ITEMS.map((item) => (
