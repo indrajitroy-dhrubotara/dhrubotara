@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { ProductCard } from "./ProductCard";
 import { Skeleton } from "./ui/Skeleton";
+import { Tree, Leaf, Sprig } from "./ui/Botanical";
 import { useProducts } from "@/lib/useProducts";
 import { type Product, type ProductCategory } from "@/lib/types";
 
@@ -115,11 +116,19 @@ export function CategorizedProductSection({ preloadedProducts }: Props) {
           <section
             key={cat.id}
             id={`category-${cat.id}`}
-            className={`py-16 md:py-24 ${cat.bg} ${
+            className={`relative py-16 md:py-24 overflow-hidden ${cat.bg} ${
               catIndex < CATEGORIES.length - 1 ? "border-b border-stone-200/30" : ""
             }`}
           >
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Botanical accents — softer for the dark herbal section */}
+            <div className={`absolute top-6 left-2 w-20 md:w-32 h-32 md:h-48 pointer-events-none ${isDark ? "text-emerald-700 opacity-40" : "text-emerald-900 opacity-80"}`}>
+              <Sprig className="w-full h-full" />
+            </div>
+            <div className={`absolute bottom-4 right-4 w-28 md:w-40 h-36 md:h-52 pointer-events-none ${isDark ? "text-emerald-700 opacity-30" : "text-emerald-900 opacity-70"}`}>
+              {cat.id === "rice-other" ? <Tree className="w-full h-full" /> : <Leaf className="w-full h-full" />}
+            </div>
+
+            <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               {/* Section header */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}

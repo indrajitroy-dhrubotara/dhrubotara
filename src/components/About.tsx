@@ -1,14 +1,23 @@
 "use client";
 import { motion } from 'framer-motion';
 import { FadeInImage } from './ui/FadeInImage';
+import { Tree, Leaf } from './ui/Botanical';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
 
 export function About() {
   return (
-    <section id="story" className="py-16 md:py-24 bg-[#FBF6E9] overflow-hidden border-b border-stone-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="story" className="relative py-16 md:py-24 bg-[#FBF6E9] overflow-hidden border-b border-stone-100">
+      {/* Botanical accents */}
+      <div className="absolute -top-4 right-2 w-32 md:w-44 h-44 md:h-56 text-emerald-900 pointer-events-none">
+        <Tree className="w-full h-full" />
+      </div>
+      <div className="absolute bottom-0 -left-8 w-24 md:w-32 h-48 md:h-64 text-emerald-900 pointer-events-none opacity-50">
+        <Leaf className="w-full h-full" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-2 gap-12 md:gap-16 items-center">
           <motion.div
             initial={{ opacity: 0, x: -50 }}

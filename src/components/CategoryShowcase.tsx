@@ -1,6 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { FadeInImage } from "./ui/FadeInImage";
+import { Sprig, Branch } from "./ui/Botanical";
 import { useCategoryImages } from "@/lib/useCategoryImages";
 import { type ProductCategory } from "@/lib/types";
 
@@ -102,8 +103,19 @@ export function CategoryShowcase() {
   const { getImage } = useCategoryImages();
 
   return (
-    <section className="py-16 md:py-24 bg-[#FBF6E9] border-b border-stone-100">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="relative py-16 md:py-24 bg-[#FBF6E9] border-b border-stone-100 overflow-hidden">
+      {/* Botanical accents */}
+      <div className="absolute top-6 left-4 w-16 md:w-24 h-28 md:h-40 text-emerald-900 pointer-events-none">
+        <Sprig className="w-full h-full" />
+      </div>
+      <div className="absolute top-10 right-4 w-16 md:w-24 h-28 md:h-40 text-emerald-900 pointer-events-none" style={{ transform: "scaleX(-1)" }}>
+        <Sprig className="w-full h-full" />
+      </div>
+      <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-48 md:w-64 h-16 md:h-20 text-emerald-900 pointer-events-none opacity-60">
+        <Branch className="w-full h-full" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}

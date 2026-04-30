@@ -1,33 +1,7 @@
 "use client";
 import { motion } from "framer-motion";
 import { trackEvent } from "@/lib/analytics";
-
-function LeafLeft() {
-  return (
-    <svg
-      viewBox="0 0 120 200"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full"
-    >
-      <path
-        d="M60 190 C60 190 10 140 20 80 C30 20 60 10 60 10 C60 10 90 20 100 80 C110 140 60 190 60 190Z"
-        fill="currentColor"
-        opacity="0.15"
-      />
-      <path
-        d="M60 10 L60 190"
-        stroke="currentColor"
-        strokeWidth="1"
-        opacity="0.2"
-      />
-      <path d="M60 50 C40 60 30 80 35 100" stroke="currentColor" strokeWidth="0.8" opacity="0.15" fill="none" />
-      <path d="M60 70 C80 80 90 100 85 120" stroke="currentColor" strokeWidth="0.8" opacity="0.15" fill="none" />
-      <path d="M60 90 C40 100 32 118 37 138" stroke="currentColor" strokeWidth="0.8" opacity="0.15" fill="none" />
-      <path d="M60 110 C80 120 88 138 83 158" stroke="currentColor" strokeWidth="0.8" opacity="0.15" fill="none" />
-    </svg>
-  );
-}
+import { Leaf, Tree } from "./ui/Botanical";
 
 const STATS = [
   { value: "100%", label: "Natural" },
@@ -49,7 +23,7 @@ export function Hero() {
         className="absolute left-0 top-1/2 -translate-y-1/2 w-24 md:w-40 h-64 md:h-96 text-emerald-900 pointer-events-none hidden sm:block"
         style={{ marginLeft: "-2rem" }}
       >
-        <LeafLeft />
+        <Leaf className="w-full h-full" />
       </motion.div>
 
       {/* Decorative botanical right (mirrored) */}
@@ -60,8 +34,16 @@ export function Hero() {
         className="absolute right-0 top-1/2 -translate-y-1/2 w-24 md:w-40 h-64 md:h-96 text-emerald-900 pointer-events-none hidden sm:block"
         style={{ marginRight: "-2rem", transform: "translateY(-50%) scaleX(-1)" }}
       >
-        <LeafLeft />
+        <Leaf className="w-full h-full" />
       </motion.div>
+
+      {/* Trees flanking the bottom corners */}
+      <div className="absolute left-2 bottom-0 w-32 md:w-44 h-40 md:h-56 text-emerald-900 pointer-events-none hidden md:block">
+        <Tree className="w-full h-full" />
+      </div>
+      <div className="absolute right-2 bottom-0 w-32 md:w-44 h-40 md:h-56 text-emerald-900 pointer-events-none hidden md:block" style={{ transform: "scaleX(-1)" }}>
+        <Tree className="w-full h-full" />
+      </div>
 
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-20">
         {/* Eyebrow */}

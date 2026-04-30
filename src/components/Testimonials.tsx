@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 import { useTestimonials } from "../lib/useTestimonials";
 import { Skeleton } from "./ui/Skeleton";
+import { Sprig, Branch } from "./ui/Botanical";
 
 function StarRating({ count = 5 }: { count?: number }) {
   return (
@@ -31,8 +32,19 @@ export function Testimonials() {
   const { testimonials, loading } = useTestimonials();
 
   return (
-    <section id="testimonials" className="py-24 bg-[#FBF6E9] border-t border-stone-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="testimonials" className="relative py-24 bg-[#FBF6E9] border-t border-stone-200 overflow-hidden">
+      {/* Botanical accents */}
+      <div className="absolute top-8 left-2 w-16 md:w-24 h-28 md:h-40 text-emerald-900 pointer-events-none opacity-70">
+        <Sprig className="w-full h-full" />
+      </div>
+      <div className="absolute bottom-12 right-2 w-16 md:w-24 h-28 md:h-40 text-emerald-900 pointer-events-none opacity-70" style={{ transform: "scaleX(-1)" }}>
+        <Sprig className="w-full h-full" />
+      </div>
+      <div className="absolute top-2 left-1/2 -translate-x-1/2 w-48 md:w-64 h-12 md:h-16 text-emerald-900 pointer-events-none opacity-50">
+        <Branch className="w-full h-full" />
+      </div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section header */}
         <div className="text-center max-w-3xl mx-auto mb-16">
           <span className="text-emerald-800 font-sans tracking-[0.2em] text-sm uppercase block mb-4">
