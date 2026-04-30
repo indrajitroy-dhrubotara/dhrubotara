@@ -67,12 +67,11 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-emerald-950 mb-6 leading-[1.1]"
         >
-          Authentic{" "}
-          <span className="italic font-light text-emerald-800">Natural</span>
+          Natural Products{" "}
+          <span className="italic font-light text-emerald-800">Thoughtfully</span>
           <br />
-          Remedies &amp; Artisanal
-          <br />
-          <span className="italic font-light">Foods</span>
+          Crafted{" "}
+          <span className="italic font-light">For You</span>
         </motion.h1>
 
         {/* Subtitle */}
@@ -82,7 +81,7 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
           className="text-emerald-900/70 font-serif italic text-lg md:text-2xl mb-10"
         >
-          From the heart of Bengal
+          Simple, reliable, &amp; Authentic From The Heart of Bengal
         </motion.p>
 
         {/* CTA */}
