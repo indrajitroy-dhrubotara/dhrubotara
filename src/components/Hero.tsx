@@ -31,7 +31,8 @@ function LeafLeft() {
 
 const STATS = [
   { value: "100%", label: "Natural" },
-  { value: "Traditional", label: "Bengali Roots" },
+  { value: "Traditional", label: "Recipes" },
+  { value: "Bengal", label: "Heritage" },
 ];
 
 export function Hero() {
