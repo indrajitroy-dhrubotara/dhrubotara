@@ -54,9 +54,14 @@ export function useCollection<T extends { id: string }>(
   const saveItem = async (item: T) => {
     if (!db) throw new Error("Firebase Firestore not initialized");
 
-    const itemRef = doc(collection(db, collectionName), item.id);
-    await setDoc(itemRef, item, { merge: true });
-    await fetchData(); 
+    // Firestore rejects undefined values — strip them before writing
+    const clean = Object.fromEntries(
+      Object.entries(item).filter(([, v]) => v !== undefined)
+    ) as T;
+
+    const itemRef = doc(collection(db, collectionName), clean.id);
+    await setDoc(itemRef, clean, { merge: true });
+    await fetchData();
   };
 
   const deleteItem = async (id: string) => {
