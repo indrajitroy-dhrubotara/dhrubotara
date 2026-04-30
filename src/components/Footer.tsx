@@ -52,12 +52,12 @@ export function Footer() {
             <div className="flex flex-col items-center md:items-start space-y-4">
               <h4 className="font-serif text-lg text-stone-100 mb-2">Contact Us</h4>
               <a
-                href="mailto:hello@dhrubotara.com"
+                href="mailto:susmitaseng@yahoo.com"
                 className="flex items-center space-x-3 hover:text-white transition-colors"
                 onClick={() => trackEvent("contact_click", { method: "email" })}
               >
                 <Mail size={18} />
-                <span>hello@dhrubotara.com</span>
+                <span>susmitaseng@yahoo.com</span>
               </a>
               <a
                 href="tel:+919831574424"
@@ -72,10 +72,22 @@ export function Footer() {
             <div className="flex flex-col items-center md:items-start">
               <h4 className="font-serif text-lg text-stone-100 mb-6">Follow Our Journey</h4>
               <div className="flex space-x-6">
-                <a href="#" className="hover:text-white transition-colors">
+                <a
+                  href="https://www.instagram.com/dhru_botara25?igsh=bjI3ZHBxdWZvdjEw"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                  onClick={() => trackEvent("social_click", { platform: "instagram" })}
+                >
                   <Instagram size={24} />
                 </a>
-                <a href="#" className="hover:text-white transition-colors">
+                <a
+                  href="https://www.facebook.com/share/1CWT6ezukh/?mibextid=wwXIfr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                  onClick={() => trackEvent("social_click", { platform: "facebook" })}
+                >
                   <Facebook size={24} />
                 </a>
               </div>
