@@ -11,7 +11,7 @@ export function CustomHamper() {
     { name: "Aam Kasundi", details: "225 gms", price: "Rs. 300" },
     { name: "Shrimp Balachaung", details: "200 gms", price: "Rs. 400" },
     { name: "Spiced Honey", details: "Sabar communities of Sunderbans, 200 gms", price: "Rs. 300" },
-    { name: "Desi Ghee", details: "Villages of Birbhum", price: "Rs. 400" },
+    { name: "Binola Ghee", details: "Villages of Birbhum", price: "Rs. 400" },
     { name: "Bori (Goyna, Masala, Hing)", details: "Made by women in West Midnapore", price: "Rs. 100/pkt" },
     { name: "Choshi", details: "Made by women in W Midnapore", price: "Rs. 100/pkt" },
   ];
