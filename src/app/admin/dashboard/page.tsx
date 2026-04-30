@@ -76,7 +76,7 @@ export default function AdminDashboard() {
       name: '',
       description: '',
       longDescription: '',
-      image: 'https://picsum.photos/seed/new/800/800',
+      image: `https://picsum.photos/seed/${Date.now()}/800/800`,
       tag: '',
       price: '',
       features: [],
