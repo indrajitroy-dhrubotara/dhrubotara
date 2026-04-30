@@ -185,6 +185,7 @@ export function CategorizedProductSection({ preloadedProducts }: Props) {
                       key={product.id}
                       {...product}
                       priority={catIndex === 0 && index < 4}
+                      dark={isDark}
                     />
                   ))}
                 </div>
