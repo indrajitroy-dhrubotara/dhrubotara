@@ -52,16 +52,20 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
 
-          {/* Left: nav links (desktop) + hamburger (mobile) */}
-          <div className="flex items-center">
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden text-stone-800 hover:text-emerald-900 p-2 cursor-pointer active:scale-95 mr-2"
-            >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+          {/* Left: logo */}
+          <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={handleLogoClick}>
+            <Image
+              src="/logo.svg"
+              alt="Dhrubotara"
+              width={64}
+              height={64}
+              className="object-contain"
+              priority
+            />
+          </div>
 
+          {/* Right: nav links (desktop) + hamburger (mobile) */}
+          <div className="flex items-center">
             {/* Desktop nav links */}
             <div className="hidden md:flex items-center space-x-8">
               {NAV_ITEMS.map((item) => (
@@ -88,18 +92,14 @@ export function Navbar() {
                 Order via WhatsApp
               </a>
             </div>
-          </div>
 
-          {/* Right: logo */}
-          <div className="flex-shrink-0 flex items-center cursor-pointer" onClick={handleLogoClick}>
-            <Image
-              src="/logo.png"
-              alt="Dhrubotara"
-              width={56}
-              height={56}
-              className="object-contain"
-              priority
-            />
+            {/* Mobile hamburger */}
+            <button
+              onClick={() => setIsOpen(!isOpen)}
+              className="md:hidden text-stone-800 hover:text-emerald-900 p-2 cursor-pointer active:scale-95"
+            >
+              {isOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
           </div>
         </div>
       </div>
