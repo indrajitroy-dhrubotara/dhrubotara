@@ -86,7 +86,7 @@ export function Navbar() {
                 href="https://wa.me/919831574424?text=Hi%2C%20I%20would%20like%20to%20place%20an%20order."
                 target="_blank"
                 rel="noopener noreferrer"
-                className="bg-amber-200 text-emerald-950 px-6 py-2 rounded-sm font-sans text-sm tracking-wide hover:bg-amber-100 transition-all cursor-pointer active:scale-95 inline-block text-center no-underline font-medium"
+                className="bg-white text-emerald-950 px-6 py-2 rounded-sm font-sans text-sm tracking-wide hover:bg-stone-100 transition-all cursor-pointer active:scale-95 inline-block text-center no-underline font-medium"
                 onClick={() => trackEvent('whatsapp_click', { location: 'navbar_desktop' })}
               >
                 Order via WhatsApp
@@ -130,7 +130,7 @@ export function Navbar() {
             href="https://wa.me/919831574424?text=Hi%2C%20I%20would%20like%20to%20place%20an%20order."
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full bg-amber-200 text-emerald-950 px-6 py-4 mt-6 rounded-sm font-sans text-base tracking-wide font-medium active:scale-95 transition-all text-center block cursor-pointer no-underline"
+            className="w-full bg-white text-emerald-950 px-6 py-4 mt-6 rounded-sm font-sans text-base tracking-wide font-medium active:scale-95 transition-all text-center block cursor-pointer no-underline"
             onClick={() => trackEvent('whatsapp_click', { location: 'navbar_mobile' })}
           >
             Order via WhatsApp
