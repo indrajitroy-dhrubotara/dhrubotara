@@ -1,17 +1,16 @@
 import { Hero } from "@/components/Hero";
 import { About } from "@/components/About";
-import { ProductSection } from "@/components/ProductSection";
+import { CategorizedProductSection } from "@/components/CategorizedProductSection";
 import { CustomHamper } from "@/components/CustomHamper";
 import { Testimonials } from "@/components/Testimonials";
-import { getProductsServer } from "@/lib/server-products";
+import { CategoryShowcase } from "@/components/CategoryShowcase";
 
-export default async function Home() {
-  const products = await getProductsServer();
-
+export default function Home() {
   return (
     <>
       <Hero />
-      <ProductSection preloadedProducts={products} />
+      <CategoryShowcase />
+      <CategorizedProductSection />
       <CustomHamper />
       <Testimonials />
       <About />

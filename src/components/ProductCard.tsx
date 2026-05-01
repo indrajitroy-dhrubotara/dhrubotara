@@ -13,9 +13,10 @@ interface ProductProps {
   tag: string;
   price?: string;
   priority?: boolean;
+  dark?: boolean;
 }
 
-export function ProductCard({ id, name, description, image, tag, price, priority }: ProductProps) {
+export function ProductCard({ id, name, description, image, tag, price, priority, dark }: ProductProps) {
   return (
     <Link
       href={`/product/${id}`}
@@ -63,16 +64,22 @@ export function ProductCard({ id, name, description, image, tag, price, priority
 
         {/* Info */}
         <div className="flex items-start justify-between gap-2 mb-1.5">
-          <h3 className="font-serif text-xl md:text-2xl text-emerald-950 group-hover:text-emerald-700 transition-colors leading-tight">
+          <h3 className={`font-serif text-xl md:text-2xl leading-tight transition-colors ${
+            dark
+              ? "text-stone-50 group-hover:text-emerald-300"
+              : "text-emerald-950 group-hover:text-emerald-700"
+          }`}>
             {name}
           </h3>
           {price && (
-            <span className="font-sans text-sm text-emerald-800 font-medium whitespace-nowrap pt-1">
+            <span className={`font-sans text-sm font-medium whitespace-nowrap pt-1 ${
+              dark ? "text-emerald-400" : "text-emerald-800"
+            }`}>
               {price}
             </span>
           )}
         </div>
-        <p className="text-stone-500 font-sans text-sm leading-relaxed">
+        <p className={`font-sans text-sm leading-relaxed ${dark ? "text-stone-400" : "text-stone-500"}`}>
           {description}
         </p>
       </motion.div>

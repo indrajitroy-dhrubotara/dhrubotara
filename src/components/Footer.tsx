@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import { Mail, Phone, Instagram, Facebook, MessageCircle } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
@@ -34,9 +35,15 @@ export function Footer() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-3 gap-8 md:gap-12 text-center md:text-left">
             <div>
-              <span className="font-serif text-3xl text-stone-100 block mb-4">
-                dhrubotara
-              </span>
+              <div className="flex justify-center md:justify-start mb-4">
+                <Image
+                  src="/logo.svg"
+                  alt="Dhrubotara"
+                  width={80}
+                  height={80}
+                  className="object-contain"
+                />
+              </div>
               <p className="font-sans text-sm leading-relaxed max-w-xs mx-auto md:mx-0 text-stone-400">
                 Bringing the purity of nature and the warmth of tradition to your home. Authentic goods, crafted with love.
               </p>
@@ -45,12 +52,12 @@ export function Footer() {
             <div className="flex flex-col items-center md:items-start space-y-4">
               <h4 className="font-serif text-lg text-stone-100 mb-2">Contact Us</h4>
               <a
-                href="mailto:hello@dhrubotara.com"
+                href="mailto:susmitaseng@yahoo.com"
                 className="flex items-center space-x-3 hover:text-white transition-colors"
                 onClick={() => trackEvent("contact_click", { method: "email" })}
               >
                 <Mail size={18} />
-                <span>hello@dhrubotara.com</span>
+                <span>susmitaseng@yahoo.com</span>
               </a>
               <a
                 href="tel:+919831574424"
@@ -65,10 +72,22 @@ export function Footer() {
             <div className="flex flex-col items-center md:items-start">
               <h4 className="font-serif text-lg text-stone-100 mb-6">Follow Our Journey</h4>
               <div className="flex space-x-6">
-                <a href="#" className="hover:text-white transition-colors">
+                <a
+                  href="https://www.instagram.com/dhru_botara25?igsh=bjI3ZHBxdWZvdjEw"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                  onClick={() => trackEvent("social_click", { platform: "instagram" })}
+                >
                   <Instagram size={24} />
                 </a>
-                <a href="#" className="hover:text-white transition-colors">
+                <a
+                  href="https://www.facebook.com/share/1CWT6ezukh/?mibextid=wwXIfr"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white transition-colors"
+                  onClick={() => trackEvent("social_click", { platform: "facebook" })}
+                >
                   <Facebook size={24} />
                 </a>
               </div>

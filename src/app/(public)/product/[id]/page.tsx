@@ -37,7 +37,7 @@ export default function ProductDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-stone-50 pt-24 pb-16">
+      <div className="min-h-screen bg-[#FBF6E9] pt-24 pb-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
            <Skeleton className="h-6 w-32 mb-8" />
            <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
@@ -62,7 +62,7 @@ export default function ProductDetailPage() {
 
   if (!product) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50">
+      <div className="min-h-screen flex items-center justify-center bg-[#FBF6E9]">
         <div className="text-center">
           <h2 className="font-serif text-3xl text-emerald-950 mb-4">Product Not Found</h2>
           <Link href="/" className="text-emerald-800 hover:text-emerald-600 underline">Return Home</Link>
@@ -72,7 +72,7 @@ export default function ProductDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-stone-50 pt-24 pb-16">
+    <div className="min-h-screen bg-[#FBF6E9] pt-24 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <Link href="/" className="inline-flex items-center text-stone-500 hover:text-emerald-900 mb-8 transition-colors group">
@@ -123,19 +123,24 @@ export default function ProductDetailPage() {
               <p>{product.longDescription}</p>
             </div>
 
-            <div className="mb-10">
-              <h3 className="font-serif text-lg text-emerald-950 mb-4">Key Highlights</h3>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {product.features.map((feature, index) => (
-                  <li key={index} className="flex items-center text-stone-600 font-sans text-sm">
-                    <span className="bg-emerald-100 text-emerald-800 p-1 rounded-full mr-3">
-                      <Check size={14} />
-                    </span>
-                    {feature}
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {(() => {
+              const highlights = product.features ?? product.codex ?? [];
+              return highlights.length > 0 ? (
+                <div className="mb-10">
+                  <h3 className="font-serif text-lg text-emerald-950 mb-4">Key Highlights</h3>
+                  <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {highlights.map((feature, index) => (
+                      <li key={index} className="flex items-center text-stone-600 font-sans text-sm">
+                        <span className="bg-emerald-100 text-emerald-800 p-1 rounded-full mr-3">
+                          <Check size={14} />
+                        </span>
+                        {feature}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ) : null;
+            })()}
 
             <div className="pt-8 border-t border-stone-200">
                <a 

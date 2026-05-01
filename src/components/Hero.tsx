@@ -1,43 +1,17 @@
 "use client";
 import { motion } from "framer-motion";
 import { trackEvent } from "@/lib/analytics";
-
-function LeafLeft() {
-  return (
-    <svg
-      viewBox="0 0 120 200"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-full h-full"
-    >
-      <path
-        d="M60 190 C60 190 10 140 20 80 C30 20 60 10 60 10 C60 10 90 20 100 80 C110 140 60 190 60 190Z"
-        fill="currentColor"
-        opacity="0.15"
-      />
-      <path
-        d="M60 10 L60 190"
-        stroke="currentColor"
-        strokeWidth="1"
-        opacity="0.2"
-      />
-      <path d="M60 50 C40 60 30 80 35 100" stroke="currentColor" strokeWidth="0.8" opacity="0.15" fill="none" />
-      <path d="M60 70 C80 80 90 100 85 120" stroke="currentColor" strokeWidth="0.8" opacity="0.15" fill="none" />
-      <path d="M60 90 C40 100 32 118 37 138" stroke="currentColor" strokeWidth="0.8" opacity="0.15" fill="none" />
-      <path d="M60 110 C80 120 88 138 83 158" stroke="currentColor" strokeWidth="0.8" opacity="0.15" fill="none" />
-    </svg>
-  );
-}
+import { Leaf, Tree } from "./ui/Botanical";
 
 const STATS = [
   { value: "100%", label: "Natural" },
-  { value: "∞", label: "Traditions" },
+  { value: "Traditional", label: "Recipes" },
   { value: "Bengal", label: "Heritage" },
 ];
 
 export function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#F5F5F0]">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#FBF6E9]">
       {/* Texture overlay */}
       <div className="absolute inset-0 bg-noise opacity-40 pointer-events-none" />
 
@@ -49,7 +23,7 @@ export function Hero() {
         className="absolute left-0 top-1/2 -translate-y-1/2 w-24 md:w-40 h-64 md:h-96 text-emerald-900 pointer-events-none hidden sm:block"
         style={{ marginLeft: "-2rem" }}
       >
-        <LeafLeft />
+        <Leaf className="w-full h-full" />
       </motion.div>
 
       {/* Decorative botanical right (mirrored) */}
@@ -60,8 +34,16 @@ export function Hero() {
         className="absolute right-0 top-1/2 -translate-y-1/2 w-24 md:w-40 h-64 md:h-96 text-emerald-900 pointer-events-none hidden sm:block"
         style={{ marginRight: "-2rem", transform: "translateY(-50%) scaleX(-1)" }}
       >
-        <LeafLeft />
+        <Leaf className="w-full h-full" />
       </motion.div>
+
+      {/* Trees flanking the bottom corners */}
+      <div className="absolute left-2 bottom-0 w-32 md:w-44 h-40 md:h-56 text-emerald-900 pointer-events-none hidden md:block">
+        <Tree className="w-full h-full" />
+      </div>
+      <div className="absolute right-2 bottom-0 w-32 md:w-44 h-40 md:h-56 text-emerald-900 pointer-events-none hidden md:block" style={{ transform: "scaleX(-1)" }}>
+        <Tree className="w-full h-full" />
+      </div>
 
       <div className="relative z-10 text-center px-4 max-w-4xl mx-auto pt-20">
         {/* Eyebrow */}
@@ -85,12 +67,11 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
           className="font-serif text-4xl sm:text-5xl md:text-6xl lg:text-7xl text-emerald-950 mb-6 leading-[1.1]"
         >
-          Authentic{" "}
-          <span className="italic font-light text-emerald-800">Natural</span>
+          Natural Products{" "}
+          <span className="italic font-light text-emerald-800">Thoughtfully</span>
           <br />
-          Remedies &amp; Artisanal
-          <br />
-          <span className="italic font-light">Foods</span>
+          Crafted{" "}
+          <span className="italic font-light">For You</span>
         </motion.h1>
 
         {/* Subtitle */}
@@ -100,7 +81,7 @@ export function Hero() {
           transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
           className="text-emerald-900/70 font-serif italic text-lg md:text-2xl mb-10"
         >
-          From the heart of Bengal
+          Simple, reliable, &amp; Authentic From The Heart of Bengal
         </motion.p>
 
         {/* CTA */}
@@ -154,23 +135,6 @@ export function Hero() {
           ))}
         </motion.div>
       </div>
-
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1.2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-      >
-        <span className="font-sans text-[10px] tracking-[0.3em] uppercase text-emerald-900/40">
-          Scroll
-        </span>
-        <motion.div
-          animate={{ y: [0, 6, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-          className="w-px h-6 bg-emerald-900/30"
-        />
-      </motion.div>
     </section>
   );
 }
