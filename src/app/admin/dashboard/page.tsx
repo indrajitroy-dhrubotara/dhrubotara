@@ -6,7 +6,7 @@ import { useProducts } from '@/lib/useProducts';
 import { useTestimonials } from '@/lib/useTestimonials';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { LogOut, Plus, Edit2, Trash2, Save, X, Upload, MessageSquare, Package, FileJson, ImageIcon, Tag } from 'lucide-react';
+import { LogOut, Plus, Edit2, Trash2, Save, X, Upload, MessageSquare, Package, FileJson, ImageIcon, Tag, GripVertical } from 'lucide-react';
 import { type Product, type Testimonial, type ProductCategory } from '@/lib/types';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -32,6 +32,12 @@ export default function AdminDashboard() {
   
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
+
+  // Drag-and-drop order state for testimonials
+  const [orderedTestimonials, setOrderedTestimonials] = useState<Testimonial[]>([]);
+  const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [orderDirty, setOrderDirty] = useState(false);
+  const dragIndexRef = useRef<number | null>(null);
   
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSeedOpen, setIsSeedOpen] = useState(false);
@@ -44,11 +50,13 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (authLoading) return;
-
-    if (!user || !isAdmin) {
-      router.push('/admin');
-    }
+    if (!user || !isAdmin) router.push('/admin');
   }, [user, isAdmin, authLoading, router]);
+
+  useEffect(() => {
+    setOrderedTestimonials(testimonials);
+    setOrderDirty(false);
+  }, [testimonials]);
 
   if (authLoading) {
     return (
@@ -252,6 +260,38 @@ export default function AdminDashboard() {
     }
   };
 
+  // --- Testimonial drag-and-drop ---
+  const handleDragStart = (index: number) => {
+    dragIndexRef.current = index;
+  };
+
+  const handleDragOver = (e: React.DragEvent, index: number) => {
+    e.preventDefault();
+    const from = dragIndexRef.current;
+    if (from === null || from === index) return;
+    const updated = [...orderedTestimonials];
+    const [moved] = updated.splice(from, 1);
+    updated.splice(index, 0, moved);
+    dragIndexRef.current = index;
+    setOrderedTestimonials(updated);
+    setOrderDirty(true);
+  };
+
+  const handleSaveOrder = async () => {
+    setIsSavingOrder(true);
+    try {
+      for (let i = 0; i < orderedTestimonials.length; i++) {
+        await saveTestimonial({ ...orderedTestimonials[i], sortOrder: i });
+      }
+      setOrderDirty(false);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Failed to save order.\n\n${msg}`);
+    } finally {
+      setIsSavingOrder(false);
+    }
+  };
+
   // --- Inline category assign ---
   const handleAssignCategory = async (product: Product, category: ProductCategory | undefined) => {
     setSavingCategoryFor(product.id);
@@ -404,37 +444,70 @@ export default function AdminDashboard() {
         {/* --- TESTIMONIALS TAB --- */}
         {activeTab === 'testimonials' && (
           <>
-             <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-6">
               <h2 className="font-serif text-2xl text-emerald-950">Testimonials</h2>
-              <button 
-                onClick={handleCreateTestimonial}
-                className="bg-emerald-800 text-white px-4 py-2 rounded-sm flex items-center hover:bg-emerald-700 transition-all shadow-sm text-sm cursor-pointer active:scale-95"
-              >
-                <Plus size={16} className="mr-2" /> Add Review
-              </button>
+              <div className="flex items-center gap-3">
+                {orderDirty && (
+                  <button
+                    onClick={handleSaveOrder}
+                    disabled={isSavingOrder}
+                    className="bg-amber-600 text-white px-4 py-2 rounded-sm flex items-center hover:bg-amber-500 transition-all shadow-sm text-sm cursor-pointer active:scale-95 disabled:opacity-60"
+                  >
+                    <Save size={16} className="mr-2" />
+                    {isSavingOrder ? 'Saving...' : 'Save Order'}
+                  </button>
+                )}
+                <button
+                  onClick={handleCreateTestimonial}
+                  className="bg-emerald-800 text-white px-4 py-2 rounded-sm flex items-center hover:bg-emerald-700 transition-all shadow-sm text-sm cursor-pointer active:scale-95"
+                >
+                  <Plus size={16} className="mr-2" /> Add Review
+                </button>
+              </div>
             </div>
+
+            {orderDirty && (
+              <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 px-3 py-2 rounded-sm mb-4">
+                Order changed — click <strong>Save Order</strong> to apply on the public site.
+              </p>
+            )}
 
             {tLoading ? (
               <div className="text-center py-20 text-stone-500">Loading reviews...</div>
             ) : (
-              <div className="grid gap-4">
-                {testimonials.map((t) => (
-                  <div key={t.id} className="bg-white p-6 rounded-sm shadow-sm border border-stone-200 flex justify-between items-start">
-                    <div className="grow pr-8">
-                       <div className="flex items-center mb-2">
+              <div className="grid gap-3">
+                {orderedTestimonials.map((t, index) => (
+                  <div
+                    key={t.id}
+                    draggable
+                    onDragStart={() => handleDragStart(index)}
+                    onDragOver={(e) => handleDragOver(e, index)}
+                    className="bg-white p-6 rounded-sm shadow-sm border border-stone-200 flex justify-between items-start cursor-grab active:cursor-grabbing select-none"
+                  >
+                    <div className="flex items-start gap-3 grow pr-8">
+                      <GripVertical size={18} className="text-stone-300 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <div className="flex items-center mb-2">
                           <span className="font-bold text-stone-900 mr-3">{t.name}</span>
                           {t.category && <span className="bg-stone-100 text-stone-600 text-xs px-2 py-0.5 rounded-sm uppercase tracking-wide">{t.category}</span>}
-                       </div>
-                       <p className="text-stone-600 text-sm italic">&quot;{t.text}&quot;</p>
-                       {t.role && <p className="text-stone-400 text-xs mt-2">{t.role}</p>}
+                        </div>
+                        <p className="text-stone-600 text-sm italic">&quot;{t.text}&quot;</p>
+                        {t.role && <p className="text-stone-400 text-xs mt-2">{t.role}</p>}
+                      </div>
                     </div>
                     <div className="flex space-x-2 shrink-0">
-                       <button onClick={() => handleEditTestimonial(t)} className="text-emerald-700 hover:text-emerald-900 p-1 cursor-pointer">
-                          <Edit2 size={18} />
-                       </button>
-                       <button onClick={() => handleDeleteTestimonial(t.id)} className="text-red-400 hover:text-red-600 p-1 cursor-pointer">
-                          <Trash2 size={18} />
-                       </button>
+                      <button
+                        onClick={() => handleEditTestimonial(t)}
+                        className="text-emerald-700 hover:text-emerald-900 p-1 cursor-pointer"
+                      >
+                        <Edit2 size={18} />
+                      </button>
+                      <button
+                        onClick={() => handleDeleteTestimonial(t.id)}
+                        className="text-red-400 hover:text-red-600 p-1 cursor-pointer"
+                      >
+                        <Trash2 size={18} />
+                      </button>
                     </div>
                   </div>
                 ))}
