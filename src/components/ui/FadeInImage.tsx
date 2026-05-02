@@ -14,6 +14,7 @@ interface FadeInImageProps {
   fill?: boolean;
   priority?: boolean;
   sizes?: string;
+  fallbackSrc?: string;
 }
 
 export function FadeInImage({
@@ -25,17 +26,30 @@ export function FadeInImage({
   height,
   fill = false,
   priority = false,
-  sizes
+  sizes,
+  fallbackSrc,
 }: FadeInImageProps) {
   const [isLoaded, setIsLoaded] = useState(false);
+  const [primaryFailed, setPrimaryFailed] = useState(false);
   const [error, setError] = useState(false);
 
+  const currentSrc = primaryFailed && fallbackSrc ? fallbackSrc : src;
+
   const handleLoad = () => setIsLoaded(true);
+
+  const handleError = () => {
+    if (fallbackSrc && !primaryFailed) {
+      setPrimaryFailed(true);
+      return;
+    }
+    setError(true);
+    setIsLoaded(true);
+  };
 
   return (
     <div className={cn("relative overflow-hidden bg-stone-100", containerClassName)}>
       <Image
-        src={src}
+        src={currentSrc}
         alt={alt}
         width={fill ? undefined : width}
         height={fill ? undefined : height}
@@ -43,10 +57,7 @@ export function FadeInImage({
         priority={priority}
         sizes={sizes}
         onLoad={handleLoad}
-        onError={() => {
-          setError(true);
-          setIsLoaded(true);
-        }}
+        onError={handleError}
         className={cn(
           "transition-all duration-1000 ease-[cubic-bezier(0.4,0,0.2,1)]",
           isLoaded && !error

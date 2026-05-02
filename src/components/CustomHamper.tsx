@@ -89,13 +89,14 @@ export function CustomHamper() {
                 { src: "/hamper-2.jpg", alt: "Hamper with Goyna Bori, Masala Bori & jars" },
                 { src: "/hamper-3.jpg", alt: "Wooden box hamper with Goyna Bori & Aam Kasundi" },
                 { src: "/hamper-4.jpg", alt: "Hamper with Shrimp Balachaung, Goyna Bori & Mixed Pickle" },
-              ].map((img, i) => (
+              ].map((img) => (
                 <div
-                  key={i}
+                  key={img.src}
                   className="aspect-square relative overflow-hidden rounded-sm border border-emerald-800/30 shadow-lg"
                 >
                   <FadeInImage
                     src={img.src}
+                    fallbackSrc="/hamper.png"
                     alt={img.alt}
                     fill
                     sizes="(max-width: 1024px) 50vw, 25vw"
