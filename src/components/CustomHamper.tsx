@@ -3,8 +3,24 @@ import { motion } from 'framer-motion';
 import { Phone } from 'lucide-react';
 import { FadeInImage } from './ui/FadeInImage';
 import { trackEvent } from '@/lib/analytics';
+import { useHamperImages } from '@/lib/useHamperImages';
+
+const FALLBACK_IMAGES = [
+  { src: "/hamper-1.jpg", alt: "Hamper with Mixed Vegetable Pickle, Aam Gur & Aam Kasundi" },
+  { src: "/hamper-2.jpg", alt: "Hamper with Goyna Bori, Masala Bori & jars" },
+  { src: "/hamper-3.jpg", alt: "Wooden box hamper with Goyna Bori & Aam Kasundi" },
+  { src: "/hamper-4.jpg", alt: "Hamper with Shrimp Balachaung, Goyna Bori & Mixed Pickle" },
+];
 
 export function CustomHamper() {
+  const { hamperImages } = useHamperImages();
+
+  const displayImages = hamperImages.length > 0
+    ? hamperImages.map((img) => ({ src: img.image, alt: "Custom hamper" }))
+    : FALLBACK_IMAGES;
+
+  const gridColsClass = displayImages.length === 1 ? "grid-cols-1" : "grid-cols-2";
+
   const products = [
     { name: "Mixed Vegetable Pickle", details: "225 gms", price: "Rs. 200" },
     { name: "Aam Gur", details: "225 gms", price: "Rs. 350" },
@@ -83,15 +99,10 @@ export function CustomHamper() {
             transition={{ duration: 0.8 }}
             className="order-1 lg:order-2 relative"
           >
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { src: "/hamper-1.jpg", alt: "Hamper with Mixed Vegetable Pickle, Aam Gur & Aam Kasundi" },
-                { src: "/hamper-2.jpg", alt: "Hamper with Goyna Bori, Masala Bori & jars" },
-                { src: "/hamper-3.jpg", alt: "Wooden box hamper with Goyna Bori & Aam Kasundi" },
-                { src: "/hamper-4.jpg", alt: "Hamper with Shrimp Balachaung, Goyna Bori & Mixed Pickle" },
-              ].map((img) => (
+            <div className={`grid ${gridColsClass} gap-3`}>
+              {displayImages.map((img, idx) => (
                 <div
-                  key={img.src}
+                  key={`${img.src}-${idx}`}
                   className="aspect-square relative overflow-hidden rounded-sm border border-emerald-800/30 shadow-lg"
                 >
                   <FadeInImage
