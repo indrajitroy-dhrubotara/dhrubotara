@@ -75,7 +75,7 @@ export function CustomHamper() {
             </div>
           </motion.div>
 
-          {/* Image */}
+          {/* Images — 2×2 grid */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -83,19 +83,31 @@ export function CustomHamper() {
             transition={{ duration: 0.8 }}
             className="order-1 lg:order-2 relative"
           >
-            <div className="aspect-square relative rounded-full overflow-hidden border-4 border-emerald-900/50 shadow-2xl">
-               <FadeInImage
-                  src="/hamper.png"
-                  alt="Customized Hamper with Jars"
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 50vw"
-                  containerClassName="w-full h-full"
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
-                />
-               <div className="absolute inset-0 bg-emerald-950/20 pointer-events-none" />
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { src: "/hamper-1.jpg", alt: "Hamper with Mixed Vegetable Pickle, Aam Gur & Aam Kasundi" },
+                { src: "/hamper-2.jpg", alt: "Hamper with Goyna Bori, Masala Bori & jars" },
+                { src: "/hamper-3.jpg", alt: "Wooden box hamper with Goyna Bori & Aam Kasundi" },
+                { src: "/hamper-4.jpg", alt: "Hamper with Shrimp Balachaung, Goyna Bori & Mixed Pickle" },
+              ].map((img, i) => (
+                <div
+                  key={i}
+                  className="aspect-square relative overflow-hidden rounded-sm border border-emerald-800/30 shadow-lg"
+                >
+                  <FadeInImage
+                    src={img.src}
+                    alt={img.alt}
+                    fill
+                    sizes="(max-width: 1024px) 50vw, 25vw"
+                    containerClassName="w-full h-full"
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
+                  />
+                  <div className="absolute inset-0 bg-emerald-950/10 pointer-events-none" />
+                </div>
+              ))}
             </div>
-            
-            {/* Decorative elements */}
+
+            {/* Decorative glows */}
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl -z-10" />
             <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-stone-500/10 rounded-full blur-3xl -z-10" />
           </motion.div>
