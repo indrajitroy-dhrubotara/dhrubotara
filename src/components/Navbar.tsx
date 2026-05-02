@@ -1,11 +1,12 @@
 "use client";
 
 import { motion } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { trackEvent } from '@/lib/analytics';
+import { useCart } from '@/context/CartContext';
 
 const NAV_ITEMS = [
   { label: 'Story', href: '/story', isPage: true },
@@ -18,6 +19,12 @@ export function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
+  const { totalItems, openCart } = useCart();
+
+  const handleCartClick = () => {
+    trackEvent('cart_open', { source: 'navbar' });
+    openCart();
+  };
 
   const handleNavClick = (href: string, isPage: boolean, label: string) => {
     setIsOpen(false);
@@ -65,7 +72,7 @@ export function Navbar() {
           </div>
 
           {/* Right: nav links (desktop) + hamburger (mobile) */}
-          <div className="flex items-center">
+          <div className="flex items-center gap-2">
             {/* Desktop nav links */}
             <div className="hidden md:flex items-center space-x-8">
               {NAV_ITEMS.map((item) => (
@@ -92,6 +99,20 @@ export function Navbar() {
                 Order via WhatsApp
               </a>
             </div>
+
+            {/* Cart button (always visible) */}
+            <button
+              onClick={handleCartClick}
+              className="relative text-stone-100 hover:text-amber-200 p-2 ml-2 cursor-pointer active:scale-95 transition-colors"
+              aria-label={`Open cart (${totalItems} items)`}
+            >
+              <ShoppingBag size={22} />
+              {totalItems > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 bg-amber-300 text-emerald-950 text-[10px] font-bold rounded-full min-w-[18px] h-[18px] px-1 flex items-center justify-center leading-none">
+                  {totalItems > 99 ? "99+" : totalItems}
+                </span>
+              )}
+            </button>
 
             {/* Mobile hamburger */}
             <button

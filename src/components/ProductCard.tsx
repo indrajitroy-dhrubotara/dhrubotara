@@ -1,9 +1,10 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, ShoppingBag } from "lucide-react";
 import { FadeInImage } from "./ui/FadeInImage";
 import { trackEvent } from "@/lib/analytics";
+import { useCart } from "@/context/CartContext";
 
 interface ProductProps {
   id: string;
@@ -17,6 +18,21 @@ interface ProductProps {
 }
 
 export function ProductCard({ id, name, description, image, tag, price, priority, dark }: ProductProps) {
+  const { addItem } = useCart();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem({ id, name, image, price });
+    trackEvent("add_to_cart", {
+      item_id: id,
+      item_name: name,
+      item_category: tag,
+      price: price ? parseFloat(price.replace(/[^0-9.]/g, "")) : undefined,
+      currency: "INR",
+    });
+  };
+
   return (
     <Link
       href={`/product/${id}`}
@@ -82,6 +98,20 @@ export function ProductCard({ id, name, description, image, tag, price, priority
         <p className={`font-sans text-sm leading-relaxed ${dark ? "text-stone-400" : "text-stone-500"}`}>
           {description}
         </p>
+
+        {/* Add to Cart */}
+        <button
+          type="button"
+          onClick={handleAddToCart}
+          className={`mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-sm font-sans text-xs tracking-widest uppercase transition-all active:scale-95 cursor-pointer ${
+            dark
+              ? "bg-stone-50 text-emerald-950 hover:bg-amber-200"
+              : "bg-emerald-900 text-stone-50 hover:bg-emerald-800"
+          }`}
+        >
+          <ShoppingBag size={14} />
+          Add to Cart
+        </button>
       </motion.div>
     </Link>
   );
