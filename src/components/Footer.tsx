@@ -3,6 +3,12 @@ import Image from "next/image";
 import { Mail, Phone, Instagram, Facebook, MessageCircle } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
+const CONTACTS = [
+  { name: "Susmita Sengupta", phone: "+919831574424", display: "+91 98315 74424" },
+  { name: "Anindita Dev", phone: "+919831092295", display: "+91 98310 92295" },
+  { name: "Indrani Roy", phone: "+916290795338", display: "+91 62907 95338" },
+];
+
 export function Footer() {
   return (
     <footer id="contact" className="bg-emerald-950 text-stone-300">
@@ -59,14 +65,20 @@ export function Footer() {
                 <Mail size={18} />
                 <span>susmitaseng@yahoo.com</span>
               </a>
-              <a
-                href="tel:+919831574424"
-                className="flex items-center space-x-3 hover:text-white transition-colors"
-                onClick={() => trackEvent("contact_click", { method: "phone" })}
-              >
-                <Phone size={18} />
-                <span>+91 98315 74424</span>
-              </a>
+              {CONTACTS.map((c) => (
+                <a
+                  key={c.phone}
+                  href={`tel:${c.phone}`}
+                  className="flex items-center space-x-3 hover:text-white transition-colors"
+                  onClick={() => trackEvent("contact_click", { method: "phone", name: c.name })}
+                >
+                  <Phone size={18} className="flex-shrink-0" />
+                  <span>
+                    <span className="text-stone-200 font-medium">{c.name}</span>{" "}
+                    {c.display}
+                  </span>
+                </a>
+              ))}
             </div>
 
             <div className="flex flex-col items-center md:items-start">
