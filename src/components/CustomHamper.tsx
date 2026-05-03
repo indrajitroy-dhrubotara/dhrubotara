@@ -22,7 +22,7 @@ export function CustomHamper() {
   const gridColsClass = displayImages.length === 1 ? "grid-cols-1" : "grid-cols-2";
 
   const products = [
-    { name: "Mixed Vegetable Pickle", details: "225 gms", price: "Rs. 200" },
+    { name: "Mixed Vegetable Pickle", details: "225 gms", price: "Rs. 250" },
     { name: "Aam Gur", details: "225 gms", price: "Rs. 350" },
     { name: "Aam Kasundi", details: "225 gms", price: "Rs. 300" },
     { name: "Shrimp Balachaung", details: "200 gms", price: "Rs. 400" },
