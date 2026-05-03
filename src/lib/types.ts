@@ -8,6 +8,7 @@ export interface Product {
   image: string;
   tag: string;
   price?: string;
+  weight?: string;
   features?: string[];
   // Legacy field name used by codex branch — treated as alias for features
   codex?: string[];

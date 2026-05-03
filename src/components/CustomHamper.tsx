@@ -4,6 +4,7 @@ import { Phone } from 'lucide-react';
 import { FadeInImage } from './ui/FadeInImage';
 import { trackEvent } from '@/lib/analytics';
 import { useHamperImages } from '@/lib/useHamperImages';
+import { useProducts } from '@/lib/useProducts';
 
 const FALLBACK_IMAGES = [
   { src: "/hamper-1.jpg", alt: "Hamper with Mixed Vegetable Pickle, Aam Gur & Aam Kasundi" },
@@ -12,8 +13,20 @@ const FALLBACK_IMAGES = [
   { src: "/hamper-4.jpg", alt: "Hamper with Shrimp Balachaung, Goyna Bori & Mixed Pickle" },
 ];
 
+const EXTRA_HAMPER_ITEMS: HamperItem[] = [
+  { name: "Goyna Bori", details: "Made by women in West Midnapore", price: "Rs. 100/pkt" },
+  { name: "Masala Bori", details: "Made by women in West Midnapore", price: "Rs. 100/pkt" },
+];
+
+interface HamperItem {
+  name: string;
+  details?: string;
+  price?: string;
+}
+
 export function CustomHamper() {
   const { hamperImages } = useHamperImages();
+  const { products: allProducts, loading: productsLoading } = useProducts();
 
   const displayImages = hamperImages.length > 0
     ? hamperImages.map((img) => ({ src: img.image, alt: "Custom hamper" }))
@@ -21,16 +34,15 @@ export function CustomHamper() {
 
   const gridColsClass = displayImages.length === 1 ? "grid-cols-1" : "grid-cols-2";
 
-  const products = [
-    { name: "Mixed Vegetable Pickle", details: "225 gms", price: "Rs. 250" },
-    { name: "Aam Gur", details: "225 gms", price: "Rs. 350" },
-    { name: "Aam Kasundi", details: "225 gms", price: "Rs. 300" },
-    { name: "Shrimp Balachaung", details: "200 gms", price: "Rs. 400" },
-    { name: "Spiced Honey", details: "Sabar communities of Sunderbans, 200 gms", price: "Rs. 300" },
-    { name: "Binola Ghee", details: "Villages of Birbhum", price: "Rs. 400" },
-    { name: "Bori (Goyna, Masala, Hing)", details: "Made by women in West Midnapore", price: "Rs. 100/pkt" },
-    { name: "Choshi", details: "Made by women in W Midnapore", price: "Rs. 100/pkt" },
-  ];
+  const condimentItems: HamperItem[] = allProducts
+    .filter((p) => p.productCategory === 'condiments')
+    .map((p) => ({
+      name: p.name,
+      details: p.weight,
+      price: p.price,
+    }));
+
+  const products: HamperItem[] = [...condimentItems, ...EXTRA_HAMPER_ITEMS];
 
   return (
     <section className="py-16 md:py-24 bg-emerald-950 text-stone-100 overflow-hidden">
@@ -56,17 +68,23 @@ export function CustomHamper() {
 
             <div className="bg-emerald-900/30 p-6 rounded-lg border border-emerald-800/50 backdrop-blur-sm mb-8">
               <h3 className="font-serif text-xl text-emerald-200 mb-4 border-b border-emerald-800/50 pb-2">Available for Hamper</h3>
-              <ul className="space-y-3">
-                {products.map((item, index) => (
-                  <li key={index} className="flex justify-between items-start text-sm md:text-base border-b border-emerald-900/30 pb-2 last:border-0 last:pb-0">
-                    <span className="text-stone-200 font-medium">
-                      {item.name} 
-                      {item.details && <span className="block text-xs text-stone-400 font-normal">{item.details}</span>}
-                    </span>
-                    <span className="text-emerald-300 font-semibold whitespace-nowrap ml-4">{item.price}</span>
-                  </li>
-                ))}
-              </ul>
+              {productsLoading && condimentItems.length === 0 ? (
+                <p className="text-stone-400 text-sm italic">Loading items…</p>
+              ) : (
+                <ul className="space-y-3">
+                  {products.map((item, index) => (
+                    <li key={`${item.name}-${index}`} className="flex justify-between items-start text-sm md:text-base border-b border-emerald-900/30 pb-2 last:border-0 last:pb-0">
+                      <span className="text-stone-200 font-medium">
+                        {item.name}
+                        {item.details && <span className="block text-xs text-stone-400 font-normal">{item.details}</span>}
+                      </span>
+                      {item.price && (
+                        <span className="text-emerald-300 font-semibold whitespace-nowrap ml-4">{item.price}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-6 items-center">

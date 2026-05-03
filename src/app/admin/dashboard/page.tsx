@@ -100,6 +100,7 @@ export default function AdminDashboard() {
       image: `https://picsum.photos/seed/${Date.now()}/800/800`,
       tag: '',
       price: '',
+      weight: '',
       features: [],
       sortPriority: undefined,
       productCategory: undefined,
@@ -1044,28 +1045,38 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-2 gap-4">
                        <div className="col-span-2 sm:col-span-1">
                           <label className="block text-sm font-medium text-stone-700 mb-1">Price</label>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             value={editingProduct.price || ''}
                             onChange={(e) => setEditingProduct({...editingProduct, price: e.target.value})}
                             className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
+                            placeholder="Rs. 250"
                           />
                        </div>
                        <div className="col-span-2 sm:col-span-1">
-                          <label className="block text-sm font-medium text-stone-700 mb-1">Sort Priority</label>
-                          <input 
-                            type="number" 
-                            value={editingProduct.sortPriority ?? ''}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              // Allow typing 0, but treat empty string as no priority
-                              const num = val === '' ? undefined : parseInt(val);
-                              setEditingProduct({...editingProduct, sortPriority: num});
-                            }}
+                          <label className="block text-sm font-medium text-stone-700 mb-1">Weight</label>
+                          <input
+                            type="text"
+                            value={editingProduct.weight || ''}
+                            onChange={(e) => setEditingProduct({...editingProduct, weight: e.target.value})}
                             className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
-                            placeholder="Higher = appears first"
+                            placeholder="225 gms"
                           />
                        </div>
+                    </div>
+                    <div>
+                       <label className="block text-sm font-medium text-stone-700 mb-1">Sort Priority</label>
+                       <input
+                         type="number"
+                         value={editingProduct.sortPriority ?? ''}
+                         onChange={(e) => {
+                           const val = e.target.value;
+                           const num = val === '' ? undefined : parseInt(val);
+                           setEditingProduct({...editingProduct, sortPriority: num});
+                         }}
+                         className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
+                         placeholder="Higher = appears first"
+                       />
                     </div>
                     <div>
                        <label className="block text-sm font-medium text-stone-700 mb-1">Product Category</label>
