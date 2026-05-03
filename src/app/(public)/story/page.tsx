@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import { FadeInImage } from '@/components/ui/FadeInImage';
+import { useStoryImages } from '@/lib/useStoryImages';
 
 const journeySteps = [
   {
@@ -52,6 +53,9 @@ const journeySteps = [
 ];
 
 export default function StoryPage() {
+  const { getImage } = useStoryImages();
+  const heroImage = getImage('story-hero') ?? '/trees.jpg';
+
   return (
     <div className="pt-20">
       {/* Hero Section */}
@@ -66,8 +70,9 @@ export default function StoryPage() {
             >
               <div className="aspect-[4/5] bg-stone-200 overflow-hidden rounded-sm shadow-xl">
                 <FadeInImage
-                  src="/trees.jpg"
-                  alt="Nature"
+                  src={heroImage}
+                  fallbackSrc="/trees.jpg"
+                  alt="Our Story"
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
                   containerClassName="w-full h-full"

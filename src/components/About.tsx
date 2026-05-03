@@ -5,8 +5,11 @@ import { Tree, Leaf } from './ui/Botanical';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { trackEvent } from '@/lib/analytics';
+import { useStoryImages } from '@/lib/useStoryImages';
 
 export function About() {
+  const { getImage } = useStoryImages();
+  const aboutImage = getImage('about') ?? '/trees.jpg';
   return (
     <section id="story" className="relative py-16 md:py-24 bg-[#FBF6E9] overflow-hidden border-b border-stone-100">
       {/* Botanical accents */}
@@ -28,8 +31,9 @@ export function About() {
           >
              <div className="aspect-[4/5] bg-stone-200 overflow-hidden rounded-sm shadow-xl">
                 <FadeInImage
-                  src="/trees.jpg"
-                  alt="Nature"
+                  src={aboutImage}
+                  fallbackSrc="/trees.jpg"
+                  alt="Our Story"
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
                   containerClassName="w-full h-full"

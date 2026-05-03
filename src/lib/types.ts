@@ -38,3 +38,10 @@ export interface HamperImage {
   image: string;
   sortOrder?: number;
 }
+
+export type StoryImageSlot = 'about' | 'story-hero';
+
+export interface StoryImage {
+  id: StoryImageSlot;
+  image: string;
+}

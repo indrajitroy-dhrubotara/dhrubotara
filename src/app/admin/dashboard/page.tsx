@@ -6,13 +6,14 @@ import { useProducts } from '@/lib/useProducts';
 import { useTestimonials } from '@/lib/useTestimonials';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { LogOut, Plus, Edit2, Trash2, Save, X, Upload, MessageSquare, Package, FileJson, ImageIcon, Tag, GripVertical, Gift } from 'lucide-react';
-import { type Product, type Testimonial, type ProductCategory } from '@/lib/types';
+import { LogOut, Plus, Edit2, Trash2, Save, X, Upload, MessageSquare, Package, FileJson, ImageIcon, Tag, GripVertical, Gift, BookOpen } from 'lucide-react';
+import { type Product, type Testimonial, type ProductCategory, type StoryImageSlot } from '@/lib/types';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { trackEvent } from '@/lib/analytics';
 import { useCategoryImages } from '@/lib/useCategoryImages';
 import { useHamperImages } from '@/lib/useHamperImages';
+import { useStoryImages } from '@/lib/useStoryImages';
 import { isFirebaseConfigured } from '@/lib/firebase';
 
 export default function AdminDashboard() {
@@ -21,15 +22,21 @@ export default function AdminDashboard() {
   const { testimonials, loading: tLoading, saveTestimonial, deleteTestimonial } = useTestimonials();
   const { saveImage, getImage } = useCategoryImages();
   const { hamperImages, loading: hLoading, addImage: addHamperImage, replaceImage: replaceHamperImage, removeImage: removeHamperImage } = useHamperImages();
+  const { saveImage: saveStoryImage, getImage: getStoryImage } = useStoryImages();
 
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'products' | 'testimonials' | 'categories' | 'categorize' | 'hamper'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'testimonials' | 'categories' | 'categorize' | 'hamper' | 'story'>('products');
   const [savingCategoryFor, setSavingCategoryFor] = useState<string | null>(null);
   const [categoryUploading, setCategoryUploading] = useState<ProductCategory | null>(null);
   const [hamperUploading, setHamperUploading] = useState(false);
   const [hamperReplacingId, setHamperReplacingId] = useState<string | null>(null);
+  const [storyUploading, setStoryUploading] = useState<StoryImageSlot | null>(null);
   const hamperAddRef = useRef<HTMLInputElement>(null);
   const hamperReplaceRef = useRef<HTMLInputElement>(null);
+  const storyFileRefs = {
+    'about': useRef<HTMLInputElement>(null),
+    'story-hero': useRef<HTMLInputElement>(null),
+  } as const;
   const categoryFileRefs = {
     condiments: useRef<HTMLInputElement>(null),
     herbal: useRef<HTMLInputElement>(null),
@@ -288,6 +295,29 @@ export default function AdminDashboard() {
     hamperReplaceRef.current?.click();
   };
 
+  // --- Story Image Upload ---
+  const handleStoryImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, slot: StoryImageSlot) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setStoryUploading(slot);
+    try {
+      if (storage) {
+        const storageRef = ref(storage, `story/${slot}_${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        await saveStoryImage(slot, url);
+        trackEvent('admin_action', { action: 'update_story_image', slot });
+      }
+    } catch (err) {
+      console.error('Story image upload failed', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Upload failed.\n\n${msg}`);
+    } finally {
+      setStoryUploading(null);
+      e.target.value = '';
+    }
+  };
+
   // --- Testimonial Image Upload ---
   const handleTestimonialImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -433,6 +463,12 @@ export default function AdminDashboard() {
              className={`pb-4 text-sm font-medium flex items-center cursor-pointer transition-all active:scale-95 ${activeTab === 'hamper' ? 'border-b-2 border-emerald-900 text-emerald-900' : 'text-stone-500 hover:text-stone-700'}`}
            >
              <Gift size={18} className="mr-2" /> Hamper Images
+           </button>
+           <button
+             onClick={() => setActiveTab('story')}
+             className={`pb-4 text-sm font-medium flex items-center cursor-pointer transition-all active:scale-95 ${activeTab === 'story' ? 'border-b-2 border-emerald-900 text-emerald-900' : 'text-stone-500 hover:text-stone-700'}`}
+           >
+             <BookOpen size={18} className="mr-2" /> Story Images
            </button>
         </div>
 
@@ -847,6 +883,75 @@ export default function AdminDashboard() {
                 })}
               </div>
             )}
+          </>
+        )}
+        {/* --- STORY IMAGES TAB --- */}
+        {activeTab === 'story' && (
+          <>
+            <div className="mb-6">
+              <h2 className="font-serif text-2xl text-emerald-950">Our Story Images</h2>
+              <p className="text-stone-500 text-sm mt-1">
+                Upload the photos shown alongside the &ldquo;Our Story&rdquo; section on the homepage and the full story page.
+              </p>
+            </div>
+
+            <div className="grid gap-6 sm:grid-cols-2">
+              {(
+                [
+                  { id: 'about' as StoryImageSlot, label: 'Homepage — Our Story', description: 'Shown on the homepage About section.' },
+                  { id: 'story-hero' as StoryImageSlot, label: 'Full Story Page — Hero', description: 'Shown on the /story page hero.' },
+                ] as const
+              ).map((slot) => {
+                const existingImage = getStoryImage(slot.id);
+                const isUploading = storyUploading === slot.id;
+
+                return (
+                  <div key={slot.id} className="bg-white border border-stone-200 rounded-sm overflow-hidden shadow-sm">
+                    <div className="relative aspect-[4/5] bg-stone-100">
+                      {existingImage ? (
+                        <Image
+                          src={existingImage}
+                          alt={slot.label}
+                          fill
+                          sizes="(max-width: 640px) 100vw, 50vw"
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center text-stone-400">
+                          <BookOpen size={32} className="mb-2 opacity-40" />
+                          <span className="text-xs font-sans tracking-wide">Using default image</span>
+                        </div>
+                      )}
+                      {isUploading && (
+                        <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-900" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="p-4">
+                      <p className="font-serif text-emerald-950 text-sm font-medium">{slot.label}</p>
+                      <p className="text-xs text-stone-500 mb-3">{slot.description}</p>
+                      <button
+                        type="button"
+                        disabled={isUploading}
+                        onClick={() => storyFileRefs[slot.id].current?.click()}
+                        className="w-full flex items-center justify-center gap-2 border border-stone-300 px-4 py-2 text-sm text-stone-600 hover:bg-stone-50 hover:border-emerald-700 hover:text-emerald-800 transition-all rounded-sm disabled:opacity-50 cursor-pointer active:scale-95"
+                      >
+                        <Upload size={15} />
+                        {existingImage ? 'Replace Image' : 'Upload Image'}
+                      </button>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        ref={storyFileRefs[slot.id]}
+                        className="hidden"
+                        onChange={(e) => handleStoryImageUpload(e, slot.id)}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </>
         )}
       </main>
