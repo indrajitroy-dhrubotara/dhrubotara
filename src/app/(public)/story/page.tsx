@@ -9,38 +9,41 @@ const journeySteps = [
     title: "The Genesis",
     subtitle: "The initiation into wellness",
     content: [
-      "In India, the \"Vaidya\" community were known for being practitioners of medicine. My family, which belonged to this community boasted of some well-known doctors and healers.",
+      "In India, the \"Vaidya\" community were known for being practitioners of medicine. My family that belonged to this community boasted of some well-known doctors and healers.",
       "Dr. Subol Majumdar, my mother's uncle, was one such individual. He was a well-known Ayurvedic doctor of his generation and some of my cherished childhood memories revolved around watching him dole out potent medicines to the long line of patients waiting to be cured. His knowledge of herbs, roots and seeds was infinite.",
       "Even my mother, grandmother and great grandmother were women of profound wisdom. They would mix and measure various ingredients, sourced from the kitchen larder, and create miracles that would cure all our illnesses.",
-      "Unknown to me, my initiation in sustained wellness began with them.",
+      "Unknown to me my initiation in sustained wellness began with them.",
       "Growing up in a family that was a treasure trove of home remedies for almost all maladies triggered a deep desire in me to preserve and nurture this special skill for the benefit of others.",
       "When I got married, I carried with me this deep interest in home remedies to my new home captured within the yellowed pages of an old notebook.",
       "Little nuggets of knowledge like massaging asafoetida (a culinary ingredient also known as Hing) mixed in water around the belly button of infants to help relieve constipation worked like magic.",
-      "We call these 'totkas' in Bengali, my native language. But to me, every totka was also a tradition. A practice that was honed into me from my early childhood."
+      "We call these ‘totkas’ in Bengali, my native language. But to me, every totka was also a tradition. A practice that was honed into me from my early childhood."
     ]
   },
   {
     id: "02",
     title: "The Rediscovery",
+    subtitle: "Finding purpose in darkness",
     content: [
-      "During the pandemic in 2020, when I was recovering from COVID, I began to search for a purpose to live.",
+      "In 2020, I was down with Covid.",
+      "Desolate, depressed and demotivated, I began to search for a purpose to live.",
       "It was then that the memory of the old notebook appeared in the recesses of my mind.",
       "I began to see the path ahead of me.",
       "I realised I wanted to revive the dying tradition of practicing totkas to ensure wellness for all.",
-      "That would be my DhruboTara, the guiding light to carry forward my legacy of good health."
+      "That would be my DhruboTara, the guiding light to carry forward my legacy of good health.",
+      "My natural interest in herbs further boosted my passion and led me to read up a lot on their benefits and advantages."
     ]
   },
   {
     id: "03",
-    title: "Sharing Wellness",
+    title: "A Labour of Love",
+    subtitle: "An inheritance shared with the world",
     content: [
-      "My natural interest in herbs boosted my passion and led me to read up a lot on their benefits and advantages.",
-      "In October 2024, driven by a personal passion, I began to prepare mixtures made from simple and easily available ingredients and share them with all my friends and relatives.",
+      "In October 2024, out of sheer personal interest and inclination I began to prepare mixtures made from simple and easily available ingredients and share them with all my friends and relatives.",
       "Soon I began to receive positive feedback from my known circles.",
-      "Thus, Dhrubotara was born not as a business endeavour but as a living legacy of natural care.",
-      "My Bengali home remedies or totkas ensure that a regular use helps you remain happy and healthy. It delivers good health as well as ensures continued wellness.",
+      "My totkas are able to cure symptomatically as well as ensure that a regular use helps you remain happy and healthy. It delivers good health as well as ensures continued wellness.",
       "All my ingredients are the ones that are readily available in the kitchen and hence consumed on a regular basis.",
-      "If you are allergic to any particular ingredient, I can also suggest a totka without that. However, you must note that the effect might be slightly delayed in that case.",
+      "If you are allergic to any particular ingredient, I can also suggest a totka without that. However, you must note that the effect might be slightly delayed in that case. Nevertheless, as the saying goes “Better late than never”.",
+      "Hence, it is always better to have some respite, even though delayed, rather than suffer endlessly.",
       "My totkas are not the result of professional expertise but purely a labour of love.",
       "They are not mere mixtures but memories that help me carry forward my legacy of wellness.",
       "An inheritance that I am proud to share with the world."
@@ -80,20 +83,20 @@ export default function StoryPage() {
               transition={{ duration: 0.8 }}
             >
               <h1 className="font-serif text-4xl md:text-5xl text-emerald-950 mb-8">
-                Our Story
+                The Dhrubotara Genesis
               </h1>
               <div className="space-y-6 text-stone-600 font-sans text-lg leading-relaxed">
                 <p>
-                  At Dhrubotara, we inherited a rich legacy of having lovingly curated the rare and precious resources of nature to care and cure. It&apos;s a tradition of love passed down through generations bottled with love for your everyday nourishment and care.
+                  In India, the &ldquo;Vaidya&rdquo; community were known for being practitioners of medicine. My family that belonged to this community boasted of some well-known doctors and healers.
                 </p>
                 <p>
-                  Natural remedies, artisanal condiments, gourmet accents that are rich in the flavours of Bengal&apos;s heritage and culture. Each one tried, tested and treasured.
+                  Dr. Subol Majumdar, my mother&apos;s uncle, was one such individual. He was a well-known Ayurvedic doctor of his generation and some of my cherished childhood memories revolved around watching him dole out potent medicines to the long line of patients waiting to be cured. His knowledge of herbs, roots and seeds was infinite.
                 </p>
                 <p>
-                  We source our ingredients from people who know nature the best and package them with extreme care to keep their natural richness intact. You deserve only the purest, the richest and the choiciest of all that nature has to offer.
+                  Even my mother, grandmother and great grandmother were women of profound wisdom. They would mix and measure various ingredients, sourced from the kitchen larder, and create miracles that would cure all our illnesses.
                 </p>
                 <p className="font-serif italic text-emerald-900 text-xl pt-2">
-                  &ldquo;Dip into its bounty with every Dhrubotara product.&rdquo;
+                  &ldquo;Unknown to me my initiation in sustained wellness began with them.&rdquo;
                 </p>
               </div>
             </motion.div>

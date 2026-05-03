@@ -49,21 +49,21 @@ export function About() {
               Our Heritage
             </span>
             <h2 className="font-serif text-4xl md:text-5xl text-emerald-950 mb-8">
-              Our Story
+              The Dhrubotara Genesis
             </h2>
             <div className="space-y-6 text-stone-600 font-sans text-lg leading-relaxed">
               <p>
-                At Dhrubotara, we inherited a rich legacy of having lovingly curated the rare and precious resources of nature to care and cure. It&apos;s a tradition of love passed down through generations bottled with love for your everyday nourishment and care.
+                In India, the &ldquo;Vaidya&rdquo; community were known for being practitioners of medicine. My family that belonged to this community boasted of some well-known doctors and healers.
               </p>
               <p>
-                Natural remedies, artisanal condiments, gourmet accents that are rich in the flavours of Bengal&apos;s heritage and culture. Each one tried, tested and treasured.
+                Dr. Subol Majumdar, my mother&apos;s uncle, was one such individual — a well-known Ayurvedic doctor whose knowledge of herbs, roots and seeds was infinite. My mother, grandmother and great grandmother were women of profound wisdom who would create miracles from the kitchen larder.
               </p>
               <p>
-                We source our ingredients from people who know nature the best and package them with extreme care to keep their natural richness intact. You deserve only the purest, the richest and the choiciest of all that nature has to offer.
+                Unknown to me, my initiation in sustained wellness began with them.
               </p>
               <blockquote className="border-l-2 border-emerald-700 pl-5 pt-2">
                 <p className="font-serif italic text-emerald-900 text-xl leading-relaxed">
-                  &ldquo;Dip into its bounty with every Dhrubotara product.&rdquo;
+                  &ldquo;They are not mere mixtures but memories that help me carry forward my legacy of wellness.&rdquo;
                 </p>
               </blockquote>
             </div>
