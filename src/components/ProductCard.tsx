@@ -1,9 +1,11 @@
 "use client";
 import { motion } from "framer-motion";
 import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Check, ShoppingBag } from "lucide-react";
+import { useState } from "react";
 import { FadeInImage } from "./ui/FadeInImage";
 import { trackEvent } from "@/lib/analytics";
+import { useCart } from "@/context/CartContext";
 
 interface ProductProps {
   id: string;
@@ -16,27 +18,37 @@ interface ProductProps {
   dark?: boolean;
 }
 
+const ADDED_FEEDBACK_MS = 1200;
+
 export function ProductCard({ id, name, description, image, tag, price, priority, dark }: ProductProps) {
+  const { addItem, openCart } = useCart();
+  const [justAdded, setJustAdded] = useState(false);
+
+  const handleSelect = () => {
+    trackEvent("select_item", {
+      item_list_id: "product_grid",
+      item_list_name: "Product Collection",
+      items: [{ item_id: id, item_name: name, item_category: tag }],
+    });
+  };
+
+  const handleAddToCart = () => {
+    addItem({ id, name, image, price, tag });
+    setJustAdded(true);
+    window.setTimeout(() => setJustAdded(false), ADDED_FEEDBACK_MS);
+    openCart();
+  };
+
   return (
-    <Link
-      href={`/product/${id}`}
-      className="block"
-      onClick={() => {
-        trackEvent("select_item", {
-          item_list_id: "product_grid",
-          item_list_name: "Product Collection",
-          items: [{ item_id: id, item_name: name, item_category: tag }],
-        });
-      }}
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      whileHover={{ y: -6 }}
+      transition={{ duration: 0.5 }}
+      className="group"
     >
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        whileHover={{ y: -6 }}
-        transition={{ duration: 0.5 }}
-        className="group cursor-pointer"
-      >
+      <Link href={`/product/${id}`} onClick={handleSelect} className="block cursor-pointer">
         {/* Image container */}
         <div className="relative aspect-square overflow-hidden bg-stone-100 mb-5">
           <FadeInImage
@@ -82,7 +94,28 @@ export function ProductCard({ id, name, description, image, tag, price, priority
         <p className={`font-sans text-sm leading-relaxed ${dark ? "text-stone-400" : "text-stone-500"}`}>
           {description}
         </p>
-      </motion.div>
-    </Link>
+      </Link>
+
+      <button
+        type="button"
+        onClick={handleAddToCart}
+        aria-label={`Add ${name} to cart`}
+        className={`mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-sm font-sans text-xs tracking-widest uppercase transition-all active:scale-95 ${
+          dark
+            ? "bg-stone-50 text-emerald-950 hover:bg-amber-100"
+            : "bg-emerald-900 text-stone-50 hover:bg-emerald-800"
+        }`}
+      >
+        {justAdded ? (
+          <>
+            <Check size={16} /> Added
+          </>
+        ) : (
+          <>
+            <ShoppingBag size={16} /> Add to Cart
+          </>
+        )}
+      </button>
+    </motion.div>
   );
 }
