@@ -89,6 +89,10 @@ export function CustomHamper() {
                   ))}
                 </ul>
               )}
+              <div className="mt-4 pt-3 border-t border-emerald-800/50 flex justify-between items-center text-sm md:text-base">
+                <span className="text-stone-300 font-medium">Packaging</span>
+                <span className="text-emerald-300 font-semibold whitespace-nowrap ml-4">₹100</span>
+              </div>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-6 items-center">
