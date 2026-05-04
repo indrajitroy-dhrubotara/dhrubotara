@@ -9,7 +9,7 @@ import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { FadeInImage } from '@/components/ui/FadeInImage';
 import { trackProductView, trackEvent } from '@/lib/analytics';
-import { useCart } from '@/context/CartContext';
+import { useCart, parsePriceToNumber } from '@/context/CartContext';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -32,7 +32,7 @@ export default function ProductDetailPage() {
         id: product.id,
         name: product.name,
         category: product.tag,
-        price: product.price ? parseFloat(product.price.replace(/[^0-9.]/g, '')) : undefined,
+        price: product.price ? parsePriceToNumber(product.price) : undefined,
         currency: 'INR',
       });
     }
@@ -182,7 +182,7 @@ export default function ProductDetailPage() {
                      trackEvent('whatsapp_order_click', {
                        product_id: product.id,
                        product_name: product.name,
-                       product_price: product.price ? parseFloat(product.price.replace(/[^0-9.]/g, '')) : undefined,
+                       product_price: product.price ? parsePriceToNumber(product.price) : undefined,
                        currency: 'INR',
                      });
                    }}

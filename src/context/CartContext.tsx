@@ -40,7 +40,11 @@ const STORAGE_KEY = "dhrubotara:cart:v1";
 
 export function parsePriceToNumber(price?: string): number {
   if (!price) return 0;
-  const parsed = parseFloat(price.replace(/[^0-9.]/g, ""));
+  // Extract the first numeric token so strings like "Rs. 350 / 500ml" or
+  // "₹350 (500g)" don't concatenate digits across price and weight.
+  const match = price.match(/\d+(?:\.\d+)?/);
+  if (!match) return 0;
+  const parsed = parseFloat(match[0]);
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
