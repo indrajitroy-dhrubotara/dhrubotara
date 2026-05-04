@@ -24,9 +24,9 @@ function buildWhatsAppMessage(items: ReturnType<typeof useCart>["items"], total:
     }),
   ];
   if (total > 0) {
-    lines.push("", `Estimated total: ₹${total.toFixed(0)}`);
+    lines.push("", `Estimated total: ₹${total.toFixed(0)} (delivery charges not included)`);
   }
-  lines.push("", "Please confirm availability and delivery. Thank you!");
+  lines.push("", "Please confirm availability and delivery charges. Thank you!");
   return lines.join("\n");
 }
 
@@ -228,11 +228,16 @@ export function CartDrawer() {
             {items.length > 0 && (
               <footer className="border-t border-stone-200 px-5 py-4 bg-white">
                 {totalValue > 0 && (
-                  <div className="flex items-center justify-between mb-3 font-sans">
-                    <span className="text-sm text-stone-500">Estimated total</span>
-                    <span className="text-lg font-medium text-emerald-950">
-                      ₹{totalValue.toFixed(0)}
-                    </span>
+                  <div className="mb-3 font-sans">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-stone-500">Estimated total</span>
+                      <span className="text-lg font-medium text-emerald-950">
+                        ₹{totalValue.toFixed(0)}
+                      </span>
+                    </div>
+                    <p className="mt-1 text-[11px] text-stone-500">
+                      Delivery charges not included &mdash; we&apos;ll confirm them on WhatsApp.
+                    </p>
                   </div>
                 )}
                 <a
