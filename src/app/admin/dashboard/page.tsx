@@ -6,12 +6,13 @@ import { useProducts } from '@/lib/useProducts';
 import { useTestimonials } from '@/lib/useTestimonials';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { LogOut, Plus, Edit2, Trash2, Save, X, Upload, MessageSquare, Package, FileJson, ImageIcon, Tag } from 'lucide-react';
+import { LogOut, Plus, Edit2, Trash2, Save, X, Upload, MessageSquare, Package, FileJson, ImageIcon, Tag, Gift } from 'lucide-react';
 import { type Product, type Testimonial, type ProductCategory } from '@/lib/types';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { trackEvent } from '@/lib/analytics';
 import { useCategoryImages } from '@/lib/useCategoryImages';
+import { useHamperImages } from '@/lib/useHamperImages';
 import { isFirebaseConfigured } from '@/lib/firebase';
 
 export default function AdminDashboard() {
@@ -19,16 +20,28 @@ export default function AdminDashboard() {
   const { products, loading: pLoading, saveProduct, deleteProduct } = useProducts();
   const { testimonials, loading: tLoading, saveTestimonial, deleteTestimonial } = useTestimonials();
   const { saveImage, getImage } = useCategoryImages();
-  
+  const {
+    images: hamperImages,
+    loading: hamperLoading,
+    addImage: addHamperImage,
+    updateImage: updateHamperImage,
+    removeImage: removeHamperImage,
+  } = useHamperImages();
+
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'products' | 'testimonials' | 'categories' | 'categorize'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'testimonials' | 'categories' | 'categorize' | 'hamper'>('products');
   const [savingCategoryFor, setSavingCategoryFor] = useState<string | null>(null);
   const [categoryUploading, setCategoryUploading] = useState<ProductCategory | null>(null);
+  const [hamperUploadingNew, setHamperUploadingNew] = useState(false);
+  const [hamperReplacingId, setHamperReplacingId] = useState<string | null>(null);
+  const [hamperDeletingId, setHamperDeletingId] = useState<string | null>(null);
   const categoryFileRefs = {
     condiments: useRef<HTMLInputElement>(null),
     herbal: useRef<HTMLInputElement>(null),
     'rice-other': useRef<HTMLInputElement>(null),
   } as const;
+  const hamperNewFileRef = useRef<HTMLInputElement>(null);
+  const hamperReplaceFileRef = useRef<HTMLInputElement>(null);
   
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
@@ -252,6 +265,76 @@ export default function AdminDashboard() {
     }
   };
 
+  // --- Hamper Image Handlers ---
+  const handleAddHamperImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setHamperUploadingNew(true);
+    try {
+      if (storage) {
+        const storageRef = ref(storage, `hamper/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        await addHamperImage(url);
+        trackEvent('admin_action', { action: 'add_hamper_image' });
+      }
+    } catch (err) {
+      console.error('Hamper image upload failed', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Upload failed.\n\n${msg}`);
+    } finally {
+      setHamperUploadingNew(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleReplaceHamperImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const targetId = hamperReplacingId;
+    if (!file || !targetId) {
+      e.target.value = '';
+      return;
+    }
+    try {
+      const existing = hamperImages.find((img) => img.id === targetId);
+      if (storage) {
+        const storageRef = ref(storage, `hamper/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        await updateHamperImage(targetId, url, existing?.sortPriority);
+        trackEvent('admin_action', { action: 'replace_hamper_image', hamper_image_id: targetId });
+      }
+    } catch (err) {
+      console.error('Hamper image replace failed', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Upload failed.\n\n${msg}`);
+    } finally {
+      setHamperReplacingId(null);
+      e.target.value = '';
+    }
+  };
+
+  const handleDeleteHamperImage = async (id: string) => {
+    if (!window.confirm('Remove this hamper image?')) return;
+    setHamperDeletingId(id);
+    try {
+      await removeHamperImage(id);
+      trackEvent('admin_action', { action: 'delete_hamper_image', hamper_image_id: id });
+    } catch (err) {
+      console.error('Hamper image delete failed', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Delete failed.\n\n${msg}`);
+    } finally {
+      setHamperDeletingId(null);
+    }
+  };
+
+  const triggerReplaceHamperImage = (id: string) => {
+    setHamperReplacingId(id);
+    // Defer click so the ref-bound input picks up the latest target id
+    window.setTimeout(() => hamperReplaceFileRef.current?.click(), 0);
+  };
+
   // --- Inline category assign ---
   const handleAssignCategory = async (product: Product, category: ProductCategory | undefined) => {
     setSavingCategoryFor(product.id);
@@ -316,6 +399,12 @@ export default function AdminDashboard() {
              className={`pb-4 text-sm font-medium flex items-center cursor-pointer transition-all active:scale-95 ${activeTab === 'categories' ? 'border-b-2 border-emerald-900 text-emerald-900' : 'text-stone-500 hover:text-stone-700'}`}
            >
              <ImageIcon size={18} className="mr-2" /> Category Images
+           </button>
+           <button
+             onClick={() => setActiveTab('hamper')}
+             className={`pb-4 text-sm font-medium flex items-center cursor-pointer transition-all active:scale-95 ${activeTab === 'hamper' ? 'border-b-2 border-emerald-900 text-emerald-900' : 'text-stone-500 hover:text-stone-700'}`}
+           >
+             <Gift size={18} className="mr-2" /> Hamper Images
            </button>
         </div>
 
@@ -597,6 +686,119 @@ export default function AdminDashboard() {
                 );
               })}
             </div>
+          </>
+        )}
+        {/* --- HAMPER IMAGES TAB --- */}
+        {activeTab === 'hamper' && (
+          <>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="font-serif text-2xl text-emerald-950">Customize Your Hamper — Pictures</h2>
+                <p className="text-stone-500 text-sm mt-1">
+                  Manage the photos that rotate in the &quot;Customize Your Own Hamper&quot; section. Add, replace, or remove images.
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={hamperUploadingNew}
+                onClick={() => hamperNewFileRef.current?.click()}
+                className="bg-emerald-800 text-white px-4 py-2 rounded-sm flex items-center hover:bg-emerald-700 transition-all shadow-sm text-sm cursor-pointer active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {hamperUploadingNew ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Uploading…
+                  </>
+                ) : (
+                  <>
+                    <Plus size={16} className="mr-2" /> Add Image
+                  </>
+                )}
+              </button>
+              <input
+                type="file"
+                accept="image/*"
+                ref={hamperNewFileRef}
+                className="hidden"
+                onChange={handleAddHamperImage}
+              />
+              <input
+                type="file"
+                accept="image/*"
+                ref={hamperReplaceFileRef}
+                className="hidden"
+                onChange={handleReplaceHamperImage}
+              />
+            </div>
+
+            {hamperLoading ? (
+              <div className="text-center py-20 text-stone-500">Loading hamper images…</div>
+            ) : hamperImages.length === 0 ? (
+              <div className="bg-white border border-dashed border-stone-300 rounded-sm py-16 text-center">
+                <Gift size={40} className="mx-auto text-stone-300 mb-3" />
+                <p className="font-serif text-lg text-emerald-950 mb-1">No hamper images yet</p>
+                <p className="text-stone-500 text-sm mb-5">
+                  Add at least one image to replace the default placeholder shown on the homepage.
+                </p>
+                <button
+                  type="button"
+                  disabled={hamperUploadingNew}
+                  onClick={() => hamperNewFileRef.current?.click()}
+                  className="inline-flex items-center bg-emerald-800 text-white px-4 py-2 rounded-sm hover:bg-emerald-700 transition-all text-sm cursor-pointer active:scale-95 disabled:opacity-60"
+                >
+                  <Upload size={15} className="mr-2" />
+                  {hamperUploadingNew ? 'Uploading…' : 'Upload First Image'}
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {hamperImages.map((img) => {
+                  const isReplacing = hamperReplacingId === img.id;
+                  const isDeleting = hamperDeletingId === img.id;
+                  const busy = isReplacing || isDeleting;
+                  return (
+                    <div
+                      key={img.id}
+                      className="bg-white border border-stone-200 rounded-sm overflow-hidden shadow-sm"
+                    >
+                      <div className="relative aspect-square bg-stone-100">
+                        <Image
+                          src={img.image}
+                          alt="Hamper"
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover"
+                        />
+                        {busy && (
+                          <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-900" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4 flex gap-2">
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => triggerReplaceHamperImage(img.id)}
+                          className="flex-1 inline-flex items-center justify-center gap-2 border border-stone-300 px-3 py-2 text-sm text-stone-700 hover:bg-stone-50 hover:border-emerald-700 hover:text-emerald-800 transition-all rounded-sm disabled:opacity-50 cursor-pointer active:scale-95"
+                        >
+                          <Upload size={15} /> Replace
+                        </button>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => handleDeleteHamperImage(img.id)}
+                          aria-label="Delete hamper image"
+                          className="inline-flex items-center justify-center px-3 py-2 border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-400 transition-all rounded-sm disabled:opacity-50 cursor-pointer active:scale-95"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </>
         )}
       </main>

@@ -31,3 +31,9 @@ export interface CategoryImage {
   id: ProductCategory;
   image: string;
 }
+
+export interface HamperImage {
+  id: string;
+  image: string;
+  sortPriority?: number;
+}
