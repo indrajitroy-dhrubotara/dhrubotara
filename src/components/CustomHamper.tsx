@@ -1,13 +1,12 @@
 "use client";
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Phone } from 'lucide-react';
-import { useEffect, useState } from 'react';
 import { FadeInImage } from './ui/FadeInImage';
 import { trackEvent } from '@/lib/analytics';
 import { useHamperImages } from '@/lib/useHamperImages';
 
 const FALLBACK_IMAGE = '/hamper.png';
-const ROTATE_INTERVAL_MS = 4500;
+const TILE_COUNT = 4;
 
 export function CustomHamper() {
   const products = [
@@ -22,22 +21,12 @@ export function CustomHamper() {
   ];
 
   const { images } = useHamperImages();
-  const galleryImages = images.length > 0
-    ? images.map((entry) => ({ key: entry.id, src: entry.image }))
-    : [{ key: 'fallback', src: FALLBACK_IMAGE }];
-
-  const [activeIndex, setActiveIndex] = useState(0);
-  const safeIndex = galleryImages.length > 0 ? activeIndex % galleryImages.length : 0;
-
-  useEffect(() => {
-    if (galleryImages.length <= 1) return;
-    const id = window.setInterval(() => {
-      setActiveIndex((current) => (current + 1) % galleryImages.length);
-    }, ROTATE_INTERVAL_MS);
-    return () => window.clearInterval(id);
-  }, [galleryImages.length]);
-
-  const active = galleryImages[safeIndex];
+  const tiles = Array.from({ length: TILE_COUNT }, (_, idx) => {
+    const entry = images[idx];
+    return entry
+      ? { key: entry.id, src: entry.image }
+      : { key: `fallback-${idx}`, src: FALLBACK_IMAGE };
+  });
 
   return (
     <section className="py-16 md:py-24 bg-emerald-950 text-stone-100 overflow-hidden">
@@ -98,7 +87,7 @@ export function CustomHamper() {
             </div>
           </motion.div>
 
-          {/* Image */}
+          {/* Image Grid */}
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -106,46 +95,28 @@ export function CustomHamper() {
             transition={{ duration: 0.8 }}
             className="order-1 lg:order-2 relative"
           >
-            <div className="aspect-square relative rounded-full overflow-hidden border-4 border-emerald-900/50 shadow-2xl">
-              <AnimatePresence mode="sync">
+            <div className="grid grid-cols-2 gap-3 md:gap-4">
+              {tiles.map((tile, idx) => (
                 <motion.div
-                  key={active.key}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.8 }}
-                  className="absolute inset-0"
+                  key={tile.key}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: idx * 0.1 }}
+                  className="aspect-square relative overflow-hidden rounded-sm border border-emerald-900/50 shadow-xl shadow-emerald-950/40"
                 >
                   <FadeInImage
-                    src={active.src}
-                    alt="Customized Hamper"
+                    src={tile.src}
+                    alt={`Hamper image ${idx + 1}`}
                     fill
-                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    sizes="(max-width: 1024px) 50vw, 25vw"
                     containerClassName="w-full h-full"
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
                   />
+                  <div className="absolute inset-0 bg-emerald-950/10 pointer-events-none" />
                 </motion.div>
-              </AnimatePresence>
-              <div className="absolute inset-0 bg-emerald-950/20 pointer-events-none" />
+              ))}
             </div>
-
-            {galleryImages.length > 1 && (
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
-                {galleryImages.map((img, idx) => (
-                  <button
-                    key={img.key}
-                    type="button"
-                    onClick={() => setActiveIndex(idx)}
-                    aria-label={`Show hamper image ${idx + 1}`}
-                    className={`h-2 rounded-full transition-all ${
-                      idx === safeIndex
-                        ? 'w-6 bg-emerald-300'
-                        : 'w-2 bg-stone-100/50 hover:bg-stone-100/80'
-                    }`}
-                  />
-                ))}
-              </div>
-            )}
 
             {/* Decorative elements */}
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl -z-10" />

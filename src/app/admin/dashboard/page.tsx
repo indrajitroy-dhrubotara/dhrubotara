@@ -695,7 +695,7 @@ export default function AdminDashboard() {
               <div>
                 <h2 className="font-serif text-2xl text-emerald-950">Customize Your Hamper — Pictures</h2>
                 <p className="text-stone-500 text-sm mt-1">
-                  Manage the photos that rotate in the &quot;Customize Your Own Hamper&quot; section. Add, replace, or remove images.
+                  The homepage shows the first <strong>4</strong> images here in a 2×2 grid. Empty slots fall back to the default placeholder.
                 </p>
               </div>
               <button
@@ -752,14 +752,17 @@ export default function AdminDashboard() {
               </div>
             ) : (
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {hamperImages.map((img) => {
+                {hamperImages.map((img, idx) => {
                   const isReplacing = hamperReplacingId === img.id;
                   const isDeleting = hamperDeletingId === img.id;
                   const busy = isReplacing || isDeleting;
+                  const isVisible = idx < 4;
                   return (
                     <div
                       key={img.id}
-                      className="bg-white border border-stone-200 rounded-sm overflow-hidden shadow-sm"
+                      className={`bg-white border rounded-sm overflow-hidden shadow-sm ${
+                        isVisible ? 'border-emerald-300' : 'border-stone-200 opacity-80'
+                      }`}
                     >
                       <div className="relative aspect-square bg-stone-100">
                         <Image
@@ -769,6 +772,15 @@ export default function AdminDashboard() {
                           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                           className="object-cover"
                         />
+                        <span
+                          className={`absolute top-2 left-2 px-2 py-0.5 text-[10px] font-semibold tracking-widest uppercase rounded-sm ${
+                            isVisible
+                              ? 'bg-emerald-700 text-white'
+                              : 'bg-stone-700/80 text-white'
+                          }`}
+                        >
+                          {isVisible ? `Slot ${idx + 1}` : 'Hidden'}
+                        </span>
                         {busy && (
                           <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
                             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-900" />
