@@ -26,6 +26,7 @@ export interface Testimonial {
   category?: string;
   role?: string;
   image?: string;
+  sortPriority?: number;
 }
 
 export interface CategoryImage {

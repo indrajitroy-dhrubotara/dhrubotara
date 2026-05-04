@@ -6,7 +6,7 @@ import { useProducts } from '@/lib/useProducts';
 import { useTestimonials } from '@/lib/useTestimonials';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { LogOut, Plus, Edit2, Trash2, Save, X, Upload, MessageSquare, Package, FileJson, ImageIcon, Tag, Gift, BookOpen } from 'lucide-react';
+import { LogOut, Plus, Edit2, Trash2, Save, X, Upload, MessageSquare, Package, FileJson, ImageIcon, Tag, Gift, BookOpen, ArrowUp, ArrowDown, ListOrdered } from 'lucide-react';
 import { type Product, type Testimonial, type ProductCategory } from '@/lib/types';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -19,7 +19,7 @@ import { isFirebaseConfigured } from '@/lib/firebase';
 export default function AdminDashboard() {
   const { user, signOut, isAdmin, loading: authLoading } = useAuth();
   const { products, loading: pLoading, saveProduct, deleteProduct } = useProducts();
-  const { testimonials, loading: tLoading, saveTestimonial, deleteTestimonial } = useTestimonials();
+  const { testimonials, loading: tLoading, saveTestimonial, deleteTestimonial, reorderTestimonials } = useTestimonials();
   const { saveImage, getImage } = useCategoryImages();
   const {
     images: hamperImages,
@@ -37,7 +37,8 @@ export default function AdminDashboard() {
   } = useStoryImages();
 
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'products' | 'testimonials' | 'categories' | 'categorize' | 'hamper' | 'story'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'testimonials' | 'reorder-testimonials' | 'categories' | 'categorize' | 'hamper' | 'story'>('products');
+  const [reorderingTestimonials, setReorderingTestimonials] = useState(false);
   const [savingCategoryFor, setSavingCategoryFor] = useState<string | null>(null);
   const [categoryUploading, setCategoryUploading] = useState<ProductCategory | null>(null);
   const [hamperUploadingNew, setHamperUploadingNew] = useState(false);
@@ -209,6 +210,28 @@ export default function AdminDashboard() {
     if (window.confirm("Delete this testimonial?")) {
       await deleteTestimonial(id);
       trackEvent('admin_action', { action: 'delete_testimonial', testimonial_id: id });
+    }
+  };
+
+  const handleMoveTestimonial = async (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= testimonials.length) return;
+    setReorderingTestimonials(true);
+    try {
+      const ids = testimonials.map((t) => t.id);
+      [ids[index], ids[targetIndex]] = [ids[targetIndex], ids[index]];
+      await reorderTestimonials(ids);
+      trackEvent('admin_action', {
+        action: 'reorder_testimonials',
+        moved_from: index,
+        moved_to: targetIndex,
+      });
+    } catch (err) {
+      console.error('Reorder failed', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Reorder failed.\n\n${msg}`);
+    } finally {
+      setReorderingTestimonials(false);
     }
   };
   
@@ -471,6 +494,12 @@ export default function AdminDashboard() {
              <MessageSquare size={18} className="mr-2" /> Testimonials
            </button>
            <button
+             onClick={() => setActiveTab('reorder-testimonials')}
+             className={`pb-4 text-sm font-medium flex items-center cursor-pointer transition-all active:scale-95 ${activeTab === 'reorder-testimonials' ? 'border-b-2 border-emerald-900 text-emerald-900' : 'text-stone-500 hover:text-stone-700'}`}
+           >
+             <ListOrdered size={18} className="mr-2" /> Reorder Reviews
+           </button>
+           <button
              onClick={() => setActiveTab('categorize')}
              className={`pb-4 text-sm font-medium flex items-center cursor-pointer transition-all active:scale-95 ${activeTab === 'categorize' ? 'border-b-2 border-emerald-900 text-emerald-900' : 'text-stone-500 hover:text-stone-700'}`}
            >
@@ -615,6 +644,81 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* --- REORDER TESTIMONIALS TAB --- */}
+        {activeTab === 'reorder-testimonials' && (
+          <>
+            <div className="mb-6">
+              <h2 className="font-serif text-2xl text-emerald-950">Reorder Testimonials</h2>
+              <p className="text-stone-500 text-sm mt-1">
+                Use the arrows to set the order in which reviews appear on the homepage. The first row is shown first.
+              </p>
+            </div>
+
+            {tLoading ? (
+              <div className="text-center py-20 text-stone-500">Loading reviews…</div>
+            ) : testimonials.length === 0 ? (
+              <div className="text-center py-20 text-stone-400 font-serif italic">No testimonials yet.</div>
+            ) : (
+              <div className="space-y-2">
+                {testimonials.map((t, index) => {
+                  const isFirst = index === 0;
+                  const isLast = index === testimonials.length - 1;
+                  return (
+                    <div
+                      key={t.id}
+                      className={`flex items-center gap-3 bg-white border border-stone-200 rounded-sm px-4 py-3 transition-opacity ${
+                        reorderingTestimonials ? 'opacity-60' : ''
+                      }`}
+                    >
+                      {/* Position number */}
+                      <span className="font-mono text-stone-400 text-sm w-6 text-right flex-shrink-0">
+                        {index + 1}
+                      </span>
+
+                      {/* Avatar */}
+                      <div className="w-10 h-10 rounded-full bg-emerald-900 text-stone-50 flex items-center justify-center font-serif text-sm flex-shrink-0 overflow-hidden relative">
+                        {t.image ? (
+                          <Image src={t.image} alt={t.name} fill sizes="40px" className="object-cover" />
+                        ) : (
+                          t.name.charAt(0)
+                        )}
+                      </div>
+
+                      {/* Name + preview */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-stone-900 truncate">{t.name}</p>
+                        <p className="text-xs text-stone-500 italic truncate">&quot;{t.text}&quot;</p>
+                      </div>
+
+                      {/* Up/Down buttons */}
+                      <div className="flex flex-col gap-1 flex-shrink-0">
+                        <button
+                          type="button"
+                          disabled={reorderingTestimonials || isFirst}
+                          onClick={() => handleMoveTestimonial(index, 'up')}
+                          aria-label={`Move ${t.name} up`}
+                          className="p-1 border border-stone-200 rounded-sm text-stone-600 hover:bg-stone-50 hover:border-emerald-700 hover:text-emerald-800 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer active:scale-95"
+                        >
+                          <ArrowUp size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={reorderingTestimonials || isLast}
+                          onClick={() => handleMoveTestimonial(index, 'down')}
+                          aria-label={`Move ${t.name} down`}
+                          className="p-1 border border-stone-200 rounded-sm text-stone-600 hover:bg-stone-50 hover:border-emerald-700 hover:text-emerald-800 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer active:scale-95"
+                        >
+                          <ArrowDown size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </>
