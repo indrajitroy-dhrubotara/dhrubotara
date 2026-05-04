@@ -1,7 +1,12 @@
 "use client";
 
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { FadeInImage } from '@/components/ui/FadeInImage';
+import { useStoryImages } from '@/lib/useStoryImages';
+
+const STORY_FALLBACK_IMAGE = '/trees.jpg';
+const STORY_ROTATE_INTERVAL_MS = 5000;
 
 const journeySteps = [
   {
@@ -49,6 +54,23 @@ const journeySteps = [
 ];
 
 export default function StoryPage() {
+  const { images: storyImages } = useStoryImages();
+  const heroImages = storyImages.length > 0
+    ? storyImages.map((entry) => ({ key: entry.id, src: entry.image }))
+    : [{ key: 'fallback', src: STORY_FALLBACK_IMAGE }];
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const safeIndex = heroImages.length > 0 ? activeIndex % heroImages.length : 0;
+  const activeHero = heroImages[safeIndex];
+
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    const id = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % heroImages.length);
+    }, STORY_ROTATE_INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, [heroImages.length]);
+
   return (
     <div className="pt-20">
       {/* Hero Section */}
@@ -61,16 +83,44 @@ export default function StoryPage() {
               transition={{ duration: 0.8 }}
               className="relative"
             >
-              <div className="aspect-[4/5] bg-stone-200 overflow-hidden rounded-sm shadow-xl">
-                <FadeInImage
-                  src="/trees.jpg"
-                  alt="Nature"
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  containerClassName="w-full h-full"
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
-                />
+              <div className="aspect-[4/5] bg-stone-200 overflow-hidden rounded-sm shadow-xl relative">
+                <AnimatePresence mode="sync">
+                  <motion.div
+                    key={activeHero.key}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="absolute inset-0"
+                  >
+                    <FadeInImage
+                      src={activeHero.src}
+                      alt="Our Story"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      containerClassName="w-full h-full"
+                      className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                    />
+                  </motion.div>
+                </AnimatePresence>
               </div>
+              {heroImages.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+                  {heroImages.map((img, idx) => (
+                    <button
+                      key={img.key}
+                      type="button"
+                      onClick={() => setActiveIndex(idx)}
+                      aria-label={`Show story image ${idx + 1}`}
+                      className={`h-2 rounded-full transition-all ${
+                        idx === safeIndex
+                          ? 'w-6 bg-emerald-700'
+                          : 'w-2 bg-stone-400/60 hover:bg-stone-500'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
               <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-emerald-50 -z-10 rounded-full" />
             </motion.div>
 

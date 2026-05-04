@@ -38,3 +38,9 @@ export interface HamperImage {
   image: string;
   sortPriority?: number;
 }
+
+export interface StoryImage {
+  id: string;
+  image: string;
+  sortPriority?: number;
+}
