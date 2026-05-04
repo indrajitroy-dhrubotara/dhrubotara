@@ -4,21 +4,36 @@ import { Phone } from 'lucide-react';
 import { FadeInImage } from './ui/FadeInImage';
 import { trackEvent } from '@/lib/analytics';
 import { useHamperImages } from '@/lib/useHamperImages';
+import { useProducts } from '@/lib/useProducts';
 
 const FALLBACK_IMAGE = '/hamper.png';
 const TILE_COUNT = 4;
 
+interface HamperListItem {
+  key: string;
+  name: string;
+  weight?: string;
+  price?: string;
+}
+
+// Boris are not in the product catalog yet — kept as static entries here.
+const STATIC_BORI_ITEMS: HamperListItem[] = [
+  { key: 'goyna-bori', name: 'Goyna Bori', weight: '100 gms', price: 'Rs. 100/pkt' },
+  { key: 'masala-bori', name: 'Masala Bori', weight: '100 gms', price: 'Rs. 100/pkt' },
+];
+
 export function CustomHamper() {
-  const products = [
-    { name: "Mixed Vegetable Pickle", details: "225 gms", price: "Rs. 200" },
-    { name: "Aam Gur", details: "225 gms", price: "Rs. 350" },
-    { name: "Aam Kasundi", details: "225 gms", price: "Rs. 300" },
-    { name: "Shrimp Balachaung", details: "200 gms", price: "Rs. 400" },
-    { name: "Spiced Honey", details: "Sabar communities of Sunderbans, 200 gms", price: "Rs. 300" },
-    { name: "Binola Ghee", details: "Villages of Birbhum", price: "Rs. 400" },
-    { name: "Bori (Goyna, Masala, Hing)", details: "Made by women in West Midnapore", price: "Rs. 100/pkt" },
-    { name: "Choshi", details: "Made by women in W Midnapore", price: "Rs. 100/pkt" },
-  ];
+  const { products } = useProducts();
+  const condimentItems: HamperListItem[] = products
+    .filter((p) => p.productCategory === 'condiments')
+    .map((p) => ({
+      key: p.id,
+      name: p.name,
+      weight: p.weight,
+      price: p.price,
+    }));
+
+  const hamperItems: HamperListItem[] = [...condimentItems, ...STATIC_BORI_ITEMS];
 
   const { images } = useHamperImages();
   const tiles = Array.from({ length: TILE_COUNT }, (_, idx) => {
@@ -52,17 +67,28 @@ export function CustomHamper() {
 
             <div className="bg-emerald-900/30 p-6 rounded-lg border border-emerald-800/50 backdrop-blur-sm mb-8">
               <h3 className="font-serif text-xl text-emerald-200 mb-4 border-b border-emerald-800/50 pb-2">Available for Hamper</h3>
-              <ul className="space-y-3">
-                {products.map((item, index) => (
-                  <li key={index} className="flex justify-between items-start text-sm md:text-base border-b border-emerald-900/30 pb-2 last:border-0 last:pb-0">
-                    <span className="text-stone-200 font-medium">
-                      {item.name}
-                      {item.details && <span className="block text-xs text-stone-400 font-normal">{item.details}</span>}
-                    </span>
-                    <span className="text-emerald-300 font-semibold whitespace-nowrap ml-4">{item.price}</span>
-                  </li>
-                ))}
-              </ul>
+              {hamperItems.length === 0 ? (
+                <p className="text-stone-400 text-sm italic">Loading items…</p>
+              ) : (
+                <ul className="space-y-3">
+                  {hamperItems.map((item) => (
+                    <li
+                      key={item.key}
+                      className="flex justify-between items-start text-sm md:text-base border-b border-emerald-900/30 pb-2 last:border-0 last:pb-0"
+                    >
+                      <span className="text-stone-200 font-medium">
+                        {item.name}
+                        {item.weight && (
+                          <span className="block text-xs text-stone-400 font-normal">{item.weight}</span>
+                        )}
+                      </span>
+                      {item.price && (
+                        <span className="text-emerald-300 font-semibold whitespace-nowrap ml-4">{item.price}</span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
 
             <div className="flex flex-col sm:flex-row gap-6 items-center">
