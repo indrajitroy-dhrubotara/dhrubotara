@@ -62,10 +62,32 @@ export function Footer() {
               <a
                 href="tel:+919831574424"
                 className="flex items-center space-x-3 hover:text-white transition-colors"
-                onClick={() => trackEvent("contact_click", { method: "phone" })}
+                onClick={() =>
+                  trackEvent("contact_click", { method: "phone", contact: "susmita" })
+                }
               >
                 <Phone size={18} />
-                <span>+91 98315 74424</span>
+                <span>Susmita Sengupta &middot; +91 98315 74424</span>
+              </a>
+              <a
+                href="tel:+919831092295"
+                className="flex items-center space-x-3 hover:text-white transition-colors"
+                onClick={() =>
+                  trackEvent("contact_click", { method: "phone", contact: "anindita" })
+                }
+              >
+                <Phone size={18} />
+                <span>Anindita Dev &middot; +91 98310 92295</span>
+              </a>
+              <a
+                href="tel:+916290795338"
+                className="flex items-center space-x-3 hover:text-white transition-colors"
+                onClick={() =>
+                  trackEvent("contact_click", { method: "phone", contact: "indrani" })
+                }
+              >
+                <Phone size={18} />
+                <span>Indrani Roy &middot; +91 62907 95338</span>
               </a>
             </div>
 

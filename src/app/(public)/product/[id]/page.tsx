@@ -3,17 +3,20 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Check } from 'lucide-react';
+import { ArrowLeft, Check, ShoppingBag } from 'lucide-react';
 import { useProducts } from '@/lib/useProducts';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { FadeInImage } from '@/components/ui/FadeInImage';
 import { trackProductView, trackEvent } from '@/lib/analytics';
+import { useCart, parsePriceToNumber } from '@/context/CartContext';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { products, loading } = useProducts();
-  
+  const { addItem, openCart } = useCart();
+  const [justAdded, setJustAdded] = useState(false);
+
   // Ensure id is a string (useParams can return string or array)
   const productId = Array.isArray(id) ? id[0] : id;
   const product = products.find((p) => p.id === productId);
@@ -29,7 +32,7 @@ export default function ProductDetailPage() {
         id: product.id,
         name: product.name,
         category: product.tag,
-        price: product.price ? parseFloat(product.price.replace(/[^0-9.]/g, '')) : undefined,
+        price: product.price ? parsePriceToNumber(product.price) : undefined,
         currency: 'INR',
       });
     }
@@ -143,22 +146,50 @@ export default function ProductDetailPage() {
             })()}
 
             <div className="pt-8 border-t border-stone-200">
-               <a 
-                 href={`https://wa.me/919831574424?text=Hi%2C%20I%20am%20interested%20in%20ordering%20${encodeURIComponent(product.name)}`}
-                 target="_blank"
-                 rel="noopener noreferrer"
-                 className="block w-full sm:w-auto bg-emerald-950 text-stone-50 text-center px-8 py-4 rounded-sm font-sans tracking-wide hover:bg-emerald-900 transition-all active:scale-95 shadow-lg shadow-emerald-900/10 cursor-pointer no-underline flex items-center justify-center"
-                 onClick={() => {
-                   trackEvent('whatsapp_order_click', {
-                     product_id: product.id,
-                     product_name: product.name,
-                     product_price: product.price ? parseFloat(product.price.replace(/[^0-9.]/g, '')) : undefined,
-                     currency: 'INR',
-                   });
-                 }}
-               >
-                 <span className="mr-2 text-lg">💬</span> Order via WhatsApp
-               </a>
+               <div className="flex flex-col sm:flex-row gap-3">
+                 <button
+                   type="button"
+                   onClick={() => {
+                     addItem({
+                       id: product.id,
+                       name: product.name,
+                       image: product.image,
+                       price: product.price,
+                       tag: product.tag,
+                     });
+                     setJustAdded(true);
+                     window.setTimeout(() => setJustAdded(false), 1500);
+                     openCart();
+                   }}
+                   className="flex-1 inline-flex items-center justify-center gap-2 bg-emerald-900 text-stone-50 px-8 py-4 rounded-sm font-sans tracking-wide hover:bg-emerald-800 transition-all active:scale-95 shadow-lg shadow-emerald-900/10 cursor-pointer"
+                 >
+                   {justAdded ? (
+                     <>
+                       <Check size={18} /> Added to Cart
+                     </>
+                   ) : (
+                     <>
+                       <ShoppingBag size={18} /> Add to Cart
+                     </>
+                   )}
+                 </button>
+                 <a
+                   href={`https://wa.me/919831574424?text=Hi%2C%20I%20am%20interested%20in%20ordering%20${encodeURIComponent(product.name)}`}
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   className="flex-1 inline-flex items-center justify-center gap-2 bg-emerald-950 text-stone-50 text-center px-8 py-4 rounded-sm font-sans tracking-wide hover:bg-emerald-900 transition-all active:scale-95 shadow-lg shadow-emerald-900/10 cursor-pointer no-underline"
+                   onClick={() => {
+                     trackEvent('whatsapp_order_click', {
+                       product_id: product.id,
+                       product_name: product.name,
+                       product_price: product.price ? parsePriceToNumber(product.price) : undefined,
+                       currency: 'INR',
+                     });
+                   }}
+                 >
+                   <span className="text-lg">💬</span> Order via WhatsApp
+                 </a>
+               </div>
                <p className="mt-4 text-center sm:text-left text-xs text-stone-400 font-sans">
                  * Due to the artisanal nature of our products, stock is limited.
                </p>

@@ -8,6 +8,7 @@ export interface Product {
   image: string;
   tag: string;
   price?: string;
+  weight?: string;
   features?: string[];
   // Legacy field name used by codex branch — treated as alias for features
   codex?: string[];
@@ -25,9 +26,22 @@ export interface Testimonial {
   category?: string;
   role?: string;
   image?: string;
+  sortPriority?: number;
 }
 
 export interface CategoryImage {
   id: ProductCategory;
   image: string;
+}
+
+export interface HamperImage {
+  id: string;
+  image: string;
+  sortPriority?: number;
+}
+
+export interface StoryImage {
+  id: string;
+  image: string;
+  sortPriority?: number;
 }

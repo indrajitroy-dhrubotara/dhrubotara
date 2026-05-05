@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { trackEvent } from '@/lib/analytics';
+import { CartButton } from '@/components/cart/CartButton';
 
 const NAV_ITEMS = [
   { label: 'Story', href: '/story', isPage: true },
@@ -91,15 +92,20 @@ export function Navbar() {
               >
                 Order via WhatsApp
               </a>
+              <CartButton variant="navbar" />
             </div>
 
-            {/* Mobile hamburger */}
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="md:hidden text-stone-100 hover:text-amber-200 p-2 cursor-pointer active:scale-95"
-            >
-              {isOpen ? <X size={24} /> : <Menu size={24} />}
-            </button>
+            {/* Mobile: cart + hamburger */}
+            <div className="flex md:hidden items-center gap-1">
+              <CartButton variant="mobile" />
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                aria-label={isOpen ? 'Close menu' : 'Open menu'}
+                className="text-stone-100 hover:text-amber-200 p-2 cursor-pointer active:scale-95"
+              >
+                {isOpen ? <X size={24} /> : <Menu size={24} />}
+              </button>
+            </div>
           </div>
         </div>
       </div>

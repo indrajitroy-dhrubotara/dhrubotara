@@ -1,7 +1,43 @@
 "use client";
 
-import { motion } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useEffect, useState } from 'react';
 import { FadeInImage } from '@/components/ui/FadeInImage';
+import { useStoryImages } from '@/lib/useStoryImages';
+
+const STORY_FALLBACK_IMAGE = '/trees.jpg';
+const STORY_ROTATE_INTERVAL_MS = 5000;
+
+const GENESIS_PARAGRAPHS: string[] = [
+  'In India, the “Vaidya” community were known for being practitioners of medicine.',
+  'My family that belonged to this community boasted of some well-known doctors and healers.',
+  'Dr. Subol Majumdar, my mother’s uncle, was one such individual. He was a well-known Ayurvedic doctor of his generation and some of my cherished childhood memories revolved around watching him dole out potent medicines to the long line of patients waiting to be cured. His knowledge of herbs, roots and seeds was infinite.',
+  'Even my mother, grandmother and great grandmother were women of profound wisdom. They would mix and measure various ingredients, sourced from the kitchen larder, and create miracles that would cure all our illnesses.',
+  'Unknown to me my initiation in sustained wellness began with them.',
+  'Growing up in a family that was a treasure trove of home remedies for almost all maladies triggered a deep desire in me to preserve and nurture this special skill for the benefit of others.',
+  'When I got married, I carried with me this deep interest in home remedies to my new home captured within the yellowed pages of an old notebook.',
+  'Little nuggets of knowledge like massaging asafoetida (a culinary ingredient also known as Hing) mixed in water around the belly button of infants to help relieve constipation worked like magic.',
+  'We call these ‘totkas’ in Bengali, my native language.',
+  'But to me, every totka was also a tradition. A practice that was honed into me from my early childhood.',
+  'In 2020, I was down with Covid.',
+  'Desolate, depressed and demotivated, I began to search for a purpose to live.',
+  'It was then that the memory of the old notebook appeared in the recesses of my mind.',
+  'I began to see the path ahead of me.',
+  'I realised I wanted to revive the dying tradition of practicing totkas to ensure wellness for all.',
+  'That would be my DhruboTara, the guiding light to carry forward my legacy of good health.',
+  'My natural interest in herbs further boosted my passion and led me to read up a lot on their benefits and advantages.',
+  'In October 2024, out of sheer personal interest and inclination I began to prepare mixtures made from simple and easily available ingredients and share them with all my friends and relatives.',
+  'Soon I began to receive positive feedback from my known circles.',
+  'My totkas are able to cure symptomatically as well as ensure that a regular use helps you remain happy and healthy.',
+  'It delivers good health as well as ensures continued wellness.',
+  'All my ingredients are the ones that are readily available in the kitchen and hence consumed on a regular basis.',
+  'If you are allergic to any particular ingredient, I can also suggest a totka without that. However, you must note that the effect might be slightly delayed in that case.',
+  'Nevertheless, as the saying goes “Better late than never”.',
+  'Hence, it is always better to have some respite, even though delayed, rather than suffer endlessly.',
+  'My totkas are not the result of professional expertise but purely a labour of love.',
+  'They are not mere mixtures but memories that help me carry forward my legacy of wellness.',
+  'An inheritance that I am proud to share with the world.',
+];
 
 const journeySteps = [
   {
@@ -49,6 +85,23 @@ const journeySteps = [
 ];
 
 export default function StoryPage() {
+  const { images: storyImages } = useStoryImages();
+  const heroImages = storyImages.length > 0
+    ? storyImages.map((entry) => ({ key: entry.id, src: entry.image }))
+    : [{ key: 'fallback', src: STORY_FALLBACK_IMAGE }];
+
+  const [activeIndex, setActiveIndex] = useState(0);
+  const safeIndex = heroImages.length > 0 ? activeIndex % heroImages.length : 0;
+  const activeHero = heroImages[safeIndex];
+
+  useEffect(() => {
+    if (heroImages.length <= 1) return;
+    const id = window.setInterval(() => {
+      setActiveIndex((current) => (current + 1) % heroImages.length);
+    }, STORY_ROTATE_INTERVAL_MS);
+    return () => window.clearInterval(id);
+  }, [heroImages.length]);
+
   return (
     <div className="pt-20">
       {/* Hero Section */}
@@ -61,16 +114,44 @@ export default function StoryPage() {
               transition={{ duration: 0.8 }}
               className="relative"
             >
-              <div className="aspect-[4/5] bg-stone-200 overflow-hidden rounded-sm shadow-xl">
-                <FadeInImage
-                  src="/trees.jpg"
-                  alt="Nature"
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  containerClassName="w-full h-full"
-                  className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
-                />
+              <div className="aspect-[4/5] bg-stone-200 overflow-hidden rounded-sm shadow-xl relative">
+                <AnimatePresence mode="sync">
+                  <motion.div
+                    key={activeHero.key}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="absolute inset-0"
+                  >
+                    <FadeInImage
+                      src={activeHero.src}
+                      alt="Our Story"
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      containerClassName="w-full h-full"
+                      className="w-full h-full object-cover grayscale hover:grayscale-0 transition-all duration-700"
+                    />
+                  </motion.div>
+                </AnimatePresence>
               </div>
+              {heroImages.length > 1 && (
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 z-10">
+                  {heroImages.map((img, idx) => (
+                    <button
+                      key={img.key}
+                      type="button"
+                      onClick={() => setActiveIndex(idx)}
+                      aria-label={`Show story image ${idx + 1}`}
+                      className={`h-2 rounded-full transition-all ${
+                        idx === safeIndex
+                          ? 'w-6 bg-emerald-700'
+                          : 'w-2 bg-stone-400/60 hover:bg-stone-500'
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
               <div className="absolute -bottom-6 -right-6 w-32 h-32 bg-emerald-50 -z-10 rounded-full" />
             </motion.div>
 
@@ -79,22 +160,16 @@ export default function StoryPage() {
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8 }}
             >
-              <h1 className="font-serif text-4xl md:text-5xl text-emerald-950 mb-8">
+              <h1 className="font-serif text-4xl md:text-5xl text-emerald-950 mb-3">
                 Our Story
               </h1>
-              <div className="space-y-6 text-stone-600 font-sans text-lg leading-relaxed">
-                <p>
-                  At Dhrubotara, we inherited a rich legacy of having lovingly curated the rare and precious resources of nature to care and cure. It&apos;s a tradition of love passed down through generations bottled with love for your everyday nourishment and care.
-                </p>
-                <p>
-                  Natural remedies, artisanal condiments, gourmet accents that are rich in the flavours of Bengal&apos;s heritage and culture. Each one tried, tested and treasured.
-                </p>
-                <p>
-                  We source our ingredients from people who know nature the best and package them with extreme care to keep their natural richness intact. You deserve only the purest, the richest and the choiciest of all that nature has to offer.
-                </p>
-                <p className="font-serif italic text-emerald-900 text-xl pt-2">
-                  &ldquo;Dip into its bounty with every Dhrubotara product.&rdquo;
-                </p>
+              <p className="font-serif italic text-emerald-900 text-xl md:text-2xl mb-8">
+                The Dhrubotara Genesis
+              </p>
+              <div className="space-y-5 text-stone-600 font-sans text-base md:text-lg leading-relaxed">
+                {GENESIS_PARAGRAPHS.map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))}
               </div>
             </motion.div>
           </div>

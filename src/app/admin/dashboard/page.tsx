@@ -6,29 +6,56 @@ import { useProducts } from '@/lib/useProducts';
 import { useTestimonials } from '@/lib/useTestimonials';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { LogOut, Plus, Edit2, Trash2, Save, X, Upload, MessageSquare, Package, FileJson, ImageIcon, Tag } from 'lucide-react';
+import { LogOut, Plus, Edit2, Trash2, Save, X, Upload, MessageSquare, Package, FileJson, ImageIcon, Tag, Gift, BookOpen, ArrowUp, ArrowDown, ListOrdered } from 'lucide-react';
 import { type Product, type Testimonial, type ProductCategory } from '@/lib/types';
 import { storage } from '@/lib/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { trackEvent } from '@/lib/analytics';
 import { useCategoryImages } from '@/lib/useCategoryImages';
+import { useHamperImages } from '@/lib/useHamperImages';
+import { useStoryImages } from '@/lib/useStoryImages';
 import { isFirebaseConfigured } from '@/lib/firebase';
 
 export default function AdminDashboard() {
   const { user, signOut, isAdmin, loading: authLoading } = useAuth();
   const { products, loading: pLoading, saveProduct, deleteProduct } = useProducts();
-  const { testimonials, loading: tLoading, saveTestimonial, deleteTestimonial } = useTestimonials();
+  const { testimonials, loading: tLoading, saveTestimonial, deleteTestimonial, reorderTestimonials } = useTestimonials();
   const { saveImage, getImage } = useCategoryImages();
-  
+  const {
+    images: hamperImages,
+    loading: hamperLoading,
+    addImage: addHamperImage,
+    updateImage: updateHamperImage,
+    removeImage: removeHamperImage,
+  } = useHamperImages();
+  const {
+    images: storyImages,
+    loading: storyLoading,
+    addImage: addStoryImage,
+    updateImage: updateStoryImage,
+    removeImage: removeStoryImage,
+  } = useStoryImages();
+
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'products' | 'testimonials' | 'categories' | 'categorize'>('products');
+  const [activeTab, setActiveTab] = useState<'products' | 'testimonials' | 'reorder-testimonials' | 'categories' | 'categorize' | 'hamper' | 'story'>('products');
+  const [reorderingTestimonials, setReorderingTestimonials] = useState(false);
   const [savingCategoryFor, setSavingCategoryFor] = useState<string | null>(null);
   const [categoryUploading, setCategoryUploading] = useState<ProductCategory | null>(null);
+  const [hamperUploadingNew, setHamperUploadingNew] = useState(false);
+  const [hamperReplacingId, setHamperReplacingId] = useState<string | null>(null);
+  const [hamperDeletingId, setHamperDeletingId] = useState<string | null>(null);
+  const [storyUploadingNew, setStoryUploadingNew] = useState(false);
+  const [storyReplacingId, setStoryReplacingId] = useState<string | null>(null);
+  const [storyDeletingId, setStoryDeletingId] = useState<string | null>(null);
   const categoryFileRefs = {
     condiments: useRef<HTMLInputElement>(null),
     herbal: useRef<HTMLInputElement>(null),
     'rice-other': useRef<HTMLInputElement>(null),
   } as const;
+  const hamperNewFileRef = useRef<HTMLInputElement>(null);
+  const hamperReplaceFileRef = useRef<HTMLInputElement>(null);
+  const storyNewFileRef = useRef<HTMLInputElement>(null);
+  const storyReplaceFileRef = useRef<HTMLInputElement>(null);
   
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
@@ -185,6 +212,28 @@ export default function AdminDashboard() {
       trackEvent('admin_action', { action: 'delete_testimonial', testimonial_id: id });
     }
   };
+
+  const handleMoveTestimonial = async (index: number, direction: 'up' | 'down') => {
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= testimonials.length) return;
+    setReorderingTestimonials(true);
+    try {
+      const ids = testimonials.map((t) => t.id);
+      [ids[index], ids[targetIndex]] = [ids[targetIndex], ids[index]];
+      await reorderTestimonials(ids);
+      trackEvent('admin_action', {
+        action: 'reorder_testimonials',
+        moved_from: index,
+        moved_to: targetIndex,
+      });
+    } catch (err) {
+      console.error('Reorder failed', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Reorder failed.\n\n${msg}`);
+    } finally {
+      setReorderingTestimonials(false);
+    }
+  };
   
   // --- Category Image Upload ---
   const handleCategoryImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, catId: ProductCategory) => {
@@ -252,6 +301,145 @@ export default function AdminDashboard() {
     }
   };
 
+  // --- Hamper Image Handlers ---
+  const handleAddHamperImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setHamperUploadingNew(true);
+    try {
+      if (storage) {
+        const storageRef = ref(storage, `hamper/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        await addHamperImage(url);
+        trackEvent('admin_action', { action: 'add_hamper_image' });
+      }
+    } catch (err) {
+      console.error('Hamper image upload failed', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Upload failed.\n\n${msg}`);
+    } finally {
+      setHamperUploadingNew(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleReplaceHamperImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const targetId = hamperReplacingId;
+    if (!file || !targetId) {
+      e.target.value = '';
+      return;
+    }
+    try {
+      const existing = hamperImages.find((img) => img.id === targetId);
+      if (storage) {
+        const storageRef = ref(storage, `hamper/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        await updateHamperImage(targetId, url, existing?.sortPriority);
+        trackEvent('admin_action', { action: 'replace_hamper_image', hamper_image_id: targetId });
+      }
+    } catch (err) {
+      console.error('Hamper image replace failed', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Upload failed.\n\n${msg}`);
+    } finally {
+      setHamperReplacingId(null);
+      e.target.value = '';
+    }
+  };
+
+  const handleDeleteHamperImage = async (id: string) => {
+    if (!window.confirm('Remove this hamper image?')) return;
+    setHamperDeletingId(id);
+    try {
+      await removeHamperImage(id);
+      trackEvent('admin_action', { action: 'delete_hamper_image', hamper_image_id: id });
+    } catch (err) {
+      console.error('Hamper image delete failed', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Delete failed.\n\n${msg}`);
+    } finally {
+      setHamperDeletingId(null);
+    }
+  };
+
+  const triggerReplaceHamperImage = (id: string) => {
+    setHamperReplacingId(id);
+    // Defer click so the ref-bound input picks up the latest target id
+    window.setTimeout(() => hamperReplaceFileRef.current?.click(), 0);
+  };
+
+  // --- Story Image Handlers ---
+  const handleAddStoryImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setStoryUploadingNew(true);
+    try {
+      if (storage) {
+        const storageRef = ref(storage, `story/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        await addStoryImage(url);
+        trackEvent('admin_action', { action: 'add_story_image' });
+      }
+    } catch (err) {
+      console.error('Story image upload failed', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Upload failed.\n\n${msg}`);
+    } finally {
+      setStoryUploadingNew(false);
+      e.target.value = '';
+    }
+  };
+
+  const handleReplaceStoryImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const targetId = storyReplacingId;
+    if (!file || !targetId) {
+      e.target.value = '';
+      return;
+    }
+    try {
+      const existing = storyImages.find((img) => img.id === targetId);
+      if (storage) {
+        const storageRef = ref(storage, `story/${Date.now()}_${file.name}`);
+        await uploadBytes(storageRef, file);
+        const url = await getDownloadURL(storageRef);
+        await updateStoryImage(targetId, url, existing?.sortPriority);
+        trackEvent('admin_action', { action: 'replace_story_image', story_image_id: targetId });
+      }
+    } catch (err) {
+      console.error('Story image replace failed', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Upload failed.\n\n${msg}`);
+    } finally {
+      setStoryReplacingId(null);
+      e.target.value = '';
+    }
+  };
+
+  const handleDeleteStoryImage = async (id: string) => {
+    if (!window.confirm('Remove this story image?')) return;
+    setStoryDeletingId(id);
+    try {
+      await removeStoryImage(id);
+      trackEvent('admin_action', { action: 'delete_story_image', story_image_id: id });
+    } catch (err) {
+      console.error('Story image delete failed', err);
+      const msg = err instanceof Error ? err.message : String(err);
+      alert(`Delete failed.\n\n${msg}`);
+    } finally {
+      setStoryDeletingId(null);
+    }
+  };
+
+  const triggerReplaceStoryImage = (id: string) => {
+    setStoryReplacingId(id);
+    window.setTimeout(() => storyReplaceFileRef.current?.click(), 0);
+  };
+
   // --- Inline category assign ---
   const handleAssignCategory = async (product: Product, category: ProductCategory | undefined) => {
     setSavingCategoryFor(product.id);
@@ -306,6 +494,12 @@ export default function AdminDashboard() {
              <MessageSquare size={18} className="mr-2" /> Testimonials
            </button>
            <button
+             onClick={() => setActiveTab('reorder-testimonials')}
+             className={`pb-4 text-sm font-medium flex items-center cursor-pointer transition-all active:scale-95 ${activeTab === 'reorder-testimonials' ? 'border-b-2 border-emerald-900 text-emerald-900' : 'text-stone-500 hover:text-stone-700'}`}
+           >
+             <ListOrdered size={18} className="mr-2" /> Reorder Reviews
+           </button>
+           <button
              onClick={() => setActiveTab('categorize')}
              className={`pb-4 text-sm font-medium flex items-center cursor-pointer transition-all active:scale-95 ${activeTab === 'categorize' ? 'border-b-2 border-emerald-900 text-emerald-900' : 'text-stone-500 hover:text-stone-700'}`}
            >
@@ -316,6 +510,18 @@ export default function AdminDashboard() {
              className={`pb-4 text-sm font-medium flex items-center cursor-pointer transition-all active:scale-95 ${activeTab === 'categories' ? 'border-b-2 border-emerald-900 text-emerald-900' : 'text-stone-500 hover:text-stone-700'}`}
            >
              <ImageIcon size={18} className="mr-2" /> Category Images
+           </button>
+           <button
+             onClick={() => setActiveTab('hamper')}
+             className={`pb-4 text-sm font-medium flex items-center cursor-pointer transition-all active:scale-95 ${activeTab === 'hamper' ? 'border-b-2 border-emerald-900 text-emerald-900' : 'text-stone-500 hover:text-stone-700'}`}
+           >
+             <Gift size={18} className="mr-2" /> Hamper Images
+           </button>
+           <button
+             onClick={() => setActiveTab('story')}
+             className={`pb-4 text-sm font-medium flex items-center cursor-pointer transition-all active:scale-95 ${activeTab === 'story' ? 'border-b-2 border-emerald-900 text-emerald-900' : 'text-stone-500 hover:text-stone-700'}`}
+           >
+             <BookOpen size={18} className="mr-2" /> Story Images
            </button>
         </div>
 
@@ -438,6 +644,81 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </>
+        )}
+
+        {/* --- REORDER TESTIMONIALS TAB --- */}
+        {activeTab === 'reorder-testimonials' && (
+          <>
+            <div className="mb-6">
+              <h2 className="font-serif text-2xl text-emerald-950">Reorder Testimonials</h2>
+              <p className="text-stone-500 text-sm mt-1">
+                Use the arrows to set the order in which reviews appear on the homepage. The first row is shown first.
+              </p>
+            </div>
+
+            {tLoading ? (
+              <div className="text-center py-20 text-stone-500">Loading reviews…</div>
+            ) : testimonials.length === 0 ? (
+              <div className="text-center py-20 text-stone-400 font-serif italic">No testimonials yet.</div>
+            ) : (
+              <div className="space-y-2">
+                {testimonials.map((t, index) => {
+                  const isFirst = index === 0;
+                  const isLast = index === testimonials.length - 1;
+                  return (
+                    <div
+                      key={t.id}
+                      className={`flex items-center gap-3 bg-white border border-stone-200 rounded-sm px-4 py-3 transition-opacity ${
+                        reorderingTestimonials ? 'opacity-60' : ''
+                      }`}
+                    >
+                      {/* Position number */}
+                      <span className="font-mono text-stone-400 text-sm w-6 text-right flex-shrink-0">
+                        {index + 1}
+                      </span>
+
+                      {/* Avatar */}
+                      <div className="w-10 h-10 rounded-full bg-emerald-900 text-stone-50 flex items-center justify-center font-serif text-sm flex-shrink-0 overflow-hidden relative">
+                        {t.image ? (
+                          <Image src={t.image} alt={t.name} fill sizes="40px" className="object-cover" />
+                        ) : (
+                          t.name.charAt(0)
+                        )}
+                      </div>
+
+                      {/* Name + preview */}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-stone-900 truncate">{t.name}</p>
+                        <p className="text-xs text-stone-500 italic truncate">&quot;{t.text}&quot;</p>
+                      </div>
+
+                      {/* Up/Down buttons */}
+                      <div className="flex flex-col gap-1 flex-shrink-0">
+                        <button
+                          type="button"
+                          disabled={reorderingTestimonials || isFirst}
+                          onClick={() => handleMoveTestimonial(index, 'up')}
+                          aria-label={`Move ${t.name} up`}
+                          className="p-1 border border-stone-200 rounded-sm text-stone-600 hover:bg-stone-50 hover:border-emerald-700 hover:text-emerald-800 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer active:scale-95"
+                        >
+                          <ArrowUp size={14} />
+                        </button>
+                        <button
+                          type="button"
+                          disabled={reorderingTestimonials || isLast}
+                          onClick={() => handleMoveTestimonial(index, 'down')}
+                          aria-label={`Move ${t.name} down`}
+                          className="p-1 border border-stone-200 rounded-sm text-stone-600 hover:bg-stone-50 hover:border-emerald-700 hover:text-emerald-800 transition-all disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer active:scale-95"
+                        >
+                          <ArrowDown size={14} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </>
@@ -599,6 +880,244 @@ export default function AdminDashboard() {
             </div>
           </>
         )}
+        {/* --- HAMPER IMAGES TAB --- */}
+        {activeTab === 'hamper' && (
+          <>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="font-serif text-2xl text-emerald-950">Customize Your Hamper — Pictures</h2>
+                <p className="text-stone-500 text-sm mt-1">
+                  The homepage shows the first <strong>4</strong> images here in a 2×2 grid. Empty slots fall back to the default placeholder.
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={hamperUploadingNew}
+                onClick={() => hamperNewFileRef.current?.click()}
+                className="bg-emerald-800 text-white px-4 py-2 rounded-sm flex items-center hover:bg-emerald-700 transition-all shadow-sm text-sm cursor-pointer active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {hamperUploadingNew ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Uploading…
+                  </>
+                ) : (
+                  <>
+                    <Plus size={16} className="mr-2" /> Add Image
+                  </>
+                )}
+              </button>
+              <input
+                type="file"
+                accept="image/*"
+                ref={hamperNewFileRef}
+                className="hidden"
+                onChange={handleAddHamperImage}
+              />
+              <input
+                type="file"
+                accept="image/*"
+                ref={hamperReplaceFileRef}
+                className="hidden"
+                onChange={handleReplaceHamperImage}
+              />
+            </div>
+
+            {hamperLoading ? (
+              <div className="text-center py-20 text-stone-500">Loading hamper images…</div>
+            ) : hamperImages.length === 0 ? (
+              <div className="bg-white border border-dashed border-stone-300 rounded-sm py-16 text-center">
+                <Gift size={40} className="mx-auto text-stone-300 mb-3" />
+                <p className="font-serif text-lg text-emerald-950 mb-1">No hamper images yet</p>
+                <p className="text-stone-500 text-sm mb-5">
+                  Add at least one image to replace the default placeholder shown on the homepage.
+                </p>
+                <button
+                  type="button"
+                  disabled={hamperUploadingNew}
+                  onClick={() => hamperNewFileRef.current?.click()}
+                  className="inline-flex items-center bg-emerald-800 text-white px-4 py-2 rounded-sm hover:bg-emerald-700 transition-all text-sm cursor-pointer active:scale-95 disabled:opacity-60"
+                >
+                  <Upload size={15} className="mr-2" />
+                  {hamperUploadingNew ? 'Uploading…' : 'Upload First Image'}
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {hamperImages.map((img, idx) => {
+                  const isReplacing = hamperReplacingId === img.id;
+                  const isDeleting = hamperDeletingId === img.id;
+                  const busy = isReplacing || isDeleting;
+                  const isVisible = idx < 4;
+                  return (
+                    <div
+                      key={img.id}
+                      className={`bg-white border rounded-sm overflow-hidden shadow-sm ${
+                        isVisible ? 'border-emerald-300' : 'border-stone-200 opacity-80'
+                      }`}
+                    >
+                      <div className="relative aspect-square bg-stone-100">
+                        <Image
+                          src={img.image}
+                          alt="Hamper"
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover"
+                        />
+                        <span
+                          className={`absolute top-2 left-2 px-2 py-0.5 text-[10px] font-semibold tracking-widest uppercase rounded-sm ${
+                            isVisible
+                              ? 'bg-emerald-700 text-white'
+                              : 'bg-stone-700/80 text-white'
+                          }`}
+                        >
+                          {isVisible ? `Slot ${idx + 1}` : 'Hidden'}
+                        </span>
+                        {busy && (
+                          <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-900" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4 flex gap-2">
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => triggerReplaceHamperImage(img.id)}
+                          className="flex-1 inline-flex items-center justify-center gap-2 border border-stone-300 px-3 py-2 text-sm text-stone-700 hover:bg-stone-50 hover:border-emerald-700 hover:text-emerald-800 transition-all rounded-sm disabled:opacity-50 cursor-pointer active:scale-95"
+                        >
+                          <Upload size={15} /> Replace
+                        </button>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => handleDeleteHamperImage(img.id)}
+                          aria-label="Delete hamper image"
+                          className="inline-flex items-center justify-center px-3 py-2 border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-400 transition-all rounded-sm disabled:opacity-50 cursor-pointer active:scale-95"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
+        {/* --- STORY IMAGES TAB --- */}
+        {activeTab === 'story' && (
+          <>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2 className="font-serif text-2xl text-emerald-950">Our Story — Pictures</h2>
+                <p className="text-stone-500 text-sm mt-1">
+                  Manage the photos shown in the hero of the Our Story page. With multiple images, the hero cross-fades between them. Empty falls back to the default image.
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={storyUploadingNew}
+                onClick={() => storyNewFileRef.current?.click()}
+                className="bg-emerald-800 text-white px-4 py-2 rounded-sm flex items-center hover:bg-emerald-700 transition-all shadow-sm text-sm cursor-pointer active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {storyUploadingNew ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
+                    Uploading…
+                  </>
+                ) : (
+                  <>
+                    <Plus size={16} className="mr-2" /> Add Image
+                  </>
+                )}
+              </button>
+              <input
+                type="file"
+                accept="image/*"
+                ref={storyNewFileRef}
+                className="hidden"
+                onChange={handleAddStoryImage}
+              />
+              <input
+                type="file"
+                accept="image/*"
+                ref={storyReplaceFileRef}
+                className="hidden"
+                onChange={handleReplaceStoryImage}
+              />
+            </div>
+
+            {storyLoading ? (
+              <div className="text-center py-20 text-stone-500">Loading story images…</div>
+            ) : storyImages.length === 0 ? (
+              <div className="bg-white border border-dashed border-stone-300 rounded-sm py-16 text-center">
+                <BookOpen size={40} className="mx-auto text-stone-300 mb-3" />
+                <p className="font-serif text-lg text-emerald-950 mb-1">No story images yet</p>
+                <p className="text-stone-500 text-sm mb-5">
+                  Add at least one image to replace the default hero photo on the Our Story page.
+                </p>
+                <button
+                  type="button"
+                  disabled={storyUploadingNew}
+                  onClick={() => storyNewFileRef.current?.click()}
+                  className="inline-flex items-center bg-emerald-800 text-white px-4 py-2 rounded-sm hover:bg-emerald-700 transition-all text-sm cursor-pointer active:scale-95 disabled:opacity-60"
+                >
+                  <Upload size={15} className="mr-2" />
+                  {storyUploadingNew ? 'Uploading…' : 'Upload First Image'}
+                </button>
+              </div>
+            ) : (
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {storyImages.map((img) => {
+                  const isReplacing = storyReplacingId === img.id;
+                  const isDeleting = storyDeletingId === img.id;
+                  const busy = isReplacing || isDeleting;
+                  return (
+                    <div
+                      key={img.id}
+                      className="bg-white border border-stone-200 rounded-sm overflow-hidden shadow-sm"
+                    >
+                      <div className="relative aspect-[4/5] bg-stone-100">
+                        <Image
+                          src={img.image}
+                          alt="Story"
+                          fill
+                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover"
+                        />
+                        {busy && (
+                          <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
+                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-900" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-4 flex gap-2">
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => triggerReplaceStoryImage(img.id)}
+                          className="flex-1 inline-flex items-center justify-center gap-2 border border-stone-300 px-3 py-2 text-sm text-stone-700 hover:bg-stone-50 hover:border-emerald-700 hover:text-emerald-800 transition-all rounded-sm disabled:opacity-50 cursor-pointer active:scale-95"
+                        >
+                          <Upload size={15} /> Replace
+                        </button>
+                        <button
+                          type="button"
+                          disabled={busy}
+                          onClick={() => handleDeleteStoryImage(img.id)}
+                          aria-label="Delete story image"
+                          className="inline-flex items-center justify-center px-3 py-2 border border-red-200 text-red-500 hover:bg-red-50 hover:border-red-400 transition-all rounded-sm disabled:opacity-50 cursor-pointer active:scale-95"
+                        >
+                          <Trash2 size={15} />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
+        )}
       </main>
 
       {/* --- MODALS --- */}
@@ -689,28 +1208,39 @@ export default function AdminDashboard() {
                     <div className="grid grid-cols-2 gap-4">
                        <div className="col-span-2 sm:col-span-1">
                           <label className="block text-sm font-medium text-stone-700 mb-1">Price</label>
-                          <input 
-                            type="text" 
+                          <input
+                            type="text"
                             value={editingProduct.price || ''}
                             onChange={(e) => setEditingProduct({...editingProduct, price: e.target.value})}
                             className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
+                            placeholder="Rs. 350"
                           />
                        </div>
                        <div className="col-span-2 sm:col-span-1">
-                          <label className="block text-sm font-medium text-stone-700 mb-1">Sort Priority</label>
-                          <input 
-                            type="number" 
-                            value={editingProduct.sortPriority ?? ''}
-                            onChange={(e) => {
-                              const val = e.target.value;
-                              // Allow typing 0, but treat empty string as no priority
-                              const num = val === '' ? undefined : parseInt(val);
-                              setEditingProduct({...editingProduct, sortPriority: num});
-                            }}
+                          <label className="block text-sm font-medium text-stone-700 mb-1">Weight</label>
+                          <input
+                            type="text"
+                            value={editingProduct.weight || ''}
+                            onChange={(e) => setEditingProduct({...editingProduct, weight: e.target.value || undefined})}
                             className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
-                            placeholder="Higher = appears first"
+                            placeholder="225 gms"
                           />
                        </div>
+                    </div>
+                    <div>
+                       <label className="block text-sm font-medium text-stone-700 mb-1">Sort Priority</label>
+                       <input
+                         type="number"
+                         value={editingProduct.sortPriority ?? ''}
+                         onChange={(e) => {
+                           const val = e.target.value;
+                           // Allow typing 0, but treat empty string as no priority
+                           const num = val === '' ? undefined : parseInt(val);
+                           setEditingProduct({...editingProduct, sortPriority: num});
+                         }}
+                         className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
+                         placeholder="Lower number = appears first"
+                       />
                     </div>
                     <div>
                        <label className="block text-sm font-medium text-stone-700 mb-1">Product Category</label>
