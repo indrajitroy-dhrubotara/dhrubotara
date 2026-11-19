@@ -5,6 +5,7 @@ import { Skeleton } from "./ui/Skeleton";
 import { Tree, Leaf, Sprig } from "./ui/Botanical";
 import { useProducts } from "@/lib/useProducts";
 import { type Product, type ProductCategory } from "@/lib/types";
+import { resolveProductCategory } from "@/lib/productCategory";
 
 interface CategoryConfig {
   id: ProductCategory;
@@ -77,27 +78,6 @@ function EmptyState({ dark, title }: { dark?: boolean; title: string }) {
 
 interface Props {
   preloadedProducts?: Product[] | null;
-}
-
-function resolveProductCategory(product: Product): ProductCategory | undefined {
-  if (product.productCategory) return product.productCategory;
-
-  const legacy = product.category?.trim().toLowerCase();
-  if (!legacy) return undefined;
-
-  if (["condiments", "pickle", "pickles", "pickles & condiments", "pickles and condiments"].includes(legacy)) {
-    return "condiments";
-  }
-
-  if (["herbal", "herbal medicines", "natural remedies", "remedies"].includes(legacy)) {
-    return "herbal";
-  }
-
-  if (["rice-other", "rice_other", "rice & other", "rice and other", "rice & other products", "rice and other products"].includes(legacy)) {
-    return "rice-other";
-  }
-
-  return undefined;
 }
 
 export function CategorizedProductSection({ preloadedProducts }: Props) {

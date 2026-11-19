@@ -6,15 +6,19 @@ import { useProducts } from '@/lib/useProducts';
 import { useTestimonials } from '@/lib/useTestimonials';
 import { useRouter } from 'next/navigation';
 import { type Product, type ProductCategory, type Testimonial } from '@/lib/types';
+import { resolveProductCategory } from '@/lib/productCategory';
 import { trackEvent } from '@/lib/analytics';
 import { useCategoryImages } from '@/lib/useCategoryImages';
 import { useHamperImages } from '@/lib/useHamperImages';
 import { useStoryImages } from '@/lib/useStoryImages';
+import { useArtistAbout } from '@/lib/useArtistAbout';
 import { isFirebaseConfigured } from '@/lib/firebase';
 import { type AdminTab } from '@/components/admin/types';
 import { DashboardHeader } from '@/components/admin/DashboardHeader';
 import { DashboardTabs } from '@/components/admin/DashboardTabs';
 import { ProductsTab } from '@/components/admin/ProductsTab';
+import { AccessoriesTab } from '@/components/admin/AccessoriesTab';
+import { ArtistTab } from '@/components/admin/ArtistTab';
 import { TestimonialsTab } from '@/components/admin/TestimonialsTab';
 import { ReorderTestimonialsTab } from '@/components/admin/ReorderTestimonialsTab';
 import { CategorizeTab } from '@/components/admin/CategorizeTab';
@@ -39,6 +43,21 @@ function emptyProduct(): Product {
     features: [],
     sortPriority: undefined,
     productCategory: undefined,
+  };
+}
+
+function emptyAccessory(): Product {
+  return {
+    id: `new-${Date.now()}`,
+    name: '',
+    description: '',
+    longDescription: '',
+    image: '',
+    tag: 'HAND-PAINTED',
+    price: '',
+    features: [],
+    sortPriority: undefined,
+    productCategory: 'accessories',
   };
 }
 
@@ -71,12 +90,22 @@ export default function AdminDashboard() {
     updateImage: updateStoryImage,
     removeImage: removeStoryImage,
   } = useStoryImages();
+  const {
+    name: artistName,
+    description: artistDescription,
+    loading: artistLoading,
+    getImage: getArtistImage,
+    saveProfile: saveArtistProfile,
+    saveImage: saveArtistImage,
+    removeImage: removeArtistImage,
+  } = useArtistAbout();
 
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<AdminTab>('products');
   const [developerMode, setDeveloperMode] = useState(false);
   const [reorderingTestimonials, setReorderingTestimonials] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [productFormVariant, setProductFormVariant] = useState<'full' | 'accessory'>('full');
   const [editingTestimonial, setEditingTestimonial] = useState<Testimonial | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [isSeedOpen, setIsSeedOpen] = useState(false);
@@ -114,7 +143,16 @@ export default function AdminDashboard() {
     if (!editingProduct) return;
     setIsSaving(true);
     try {
-      await saveProduct(editingProduct);
+      const toSave =
+        productFormVariant === 'accessory'
+          ? {
+              ...editingProduct,
+              productCategory: 'accessories' as const,
+              tag: editingProduct.tag || 'HAND-PAINTED',
+              longDescription: editingProduct.longDescription || editingProduct.description,
+            }
+          : editingProduct;
+      await saveProduct(toSave);
       trackEvent('admin_action', {
         action: editingProduct.id.startsWith('new-') ? 'create_product' : 'update_product',
         product_id: editingProduct.id,
@@ -243,15 +281,47 @@ export default function AdminDashboard() {
             loading={pLoading}
             developerMode={developerMode}
             onCreate={() => {
+              setProductFormVariant('full');
               setEditingProduct(emptyProduct());
               setIsFormOpen(true);
             }}
             onEdit={(product) => {
+              setProductFormVariant('full');
               setEditingProduct(product);
               setIsFormOpen(true);
             }}
             onDelete={handleDeleteProduct}
             onOpenSeed={() => setIsSeedOpen(true)}
+          />
+        )}
+
+        {activeTab === 'accessories' && (
+          <AccessoriesTab
+            products={products.filter((product) => resolveProductCategory(product) === 'accessories')}
+            loading={pLoading}
+            onCreate={() => {
+              setProductFormVariant('accessory');
+              setEditingProduct(emptyAccessory());
+              setIsFormOpen(true);
+            }}
+            onEdit={(product) => {
+              setProductFormVariant('accessory');
+              setEditingProduct(product);
+              setIsFormOpen(true);
+            }}
+            onDelete={handleDeleteProduct}
+          />
+        )}
+
+        {activeTab === 'artist' && (
+          <ArtistTab
+            name={artistName}
+            description={artistDescription}
+            getImage={getArtistImage}
+            loading={artistLoading}
+            onSaveProfile={saveArtistProfile}
+            onSaveImage={saveArtistImage}
+            onRemoveImage={removeArtistImage}
           />
         )}
 
@@ -325,6 +395,7 @@ export default function AdminDashboard() {
         <ProductFormModal
           product={editingProduct}
           isSaving={isSaving}
+          variant={productFormVariant}
           onChange={setEditingProduct}
           onSave={handleSaveProduct}
           onClose={() => {

@@ -8,6 +8,7 @@ const CAT_BUTTONS: { id: ProductCategory; label: string; color: string; activeCo
   { id: 'condiments', label: 'Pickles', color: 'border-amber-300 text-amber-800 hover:bg-amber-50', activeColor: 'bg-amber-600 border-amber-600 text-white' },
   { id: 'herbal', label: 'Herbal', color: 'border-emerald-300 text-emerald-800 hover:bg-emerald-50', activeColor: 'bg-emerald-700 border-emerald-700 text-white' },
   { id: 'rice-other', label: 'Rice', color: 'border-stone-300 text-stone-600 hover:bg-stone-50', activeColor: 'bg-stone-600 border-stone-600 text-white' },
+  { id: 'accessories', label: 'Art', color: 'border-rose-300 text-rose-800 hover:bg-rose-50', activeColor: 'bg-rose-700 border-rose-700 text-white' },
 ];
 
 interface CategorizeTabProps {
@@ -73,7 +74,7 @@ export function CategorizeTab({ products, loading, onAssign }: CategorizeTabProp
                   <span className="flex-1 text-sm font-medium text-stone-800 truncate min-w-0">
                     {product.name}
                   </span>
-                  <div className="flex gap-2 shrink-0">
+                  <div className="flex gap-2 shrink-0 flex-wrap justify-end">
                     {CAT_BUTTONS.map((btn) => (
                       <button
                         key={btn.id}

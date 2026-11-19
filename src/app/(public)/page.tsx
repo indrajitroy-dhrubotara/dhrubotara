@@ -4,6 +4,7 @@ import { CategorizedProductSection } from "@/components/CategorizedProductSectio
 import { CustomHamper } from "@/components/CustomHamper";
 import { Testimonials } from "@/components/Testimonials";
 import { CategoryShowcase } from "@/components/CategoryShowcase";
+import { AccessoriesPreview } from "@/components/AccessoriesPreview";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
       <Hero />
       <CategoryShowcase />
       <CategorizedProductSection />
+      <AccessoriesPreview />
       <CustomHamper />
       <Testimonials />
       <About />
