@@ -11,12 +11,14 @@ import { trackEvent } from '@/lib/analytics';
 import { useCategoryImages } from '@/lib/useCategoryImages';
 import { useHamperImages } from '@/lib/useHamperImages';
 import { useStoryImages } from '@/lib/useStoryImages';
+import { useArtistAbout } from '@/lib/useArtistAbout';
 import { isFirebaseConfigured } from '@/lib/firebase';
 import { type AdminTab } from '@/components/admin/types';
 import { DashboardHeader } from '@/components/admin/DashboardHeader';
 import { DashboardTabs } from '@/components/admin/DashboardTabs';
 import { ProductsTab } from '@/components/admin/ProductsTab';
 import { AccessoriesTab } from '@/components/admin/AccessoriesTab';
+import { ArtistTab } from '@/components/admin/ArtistTab';
 import { TestimonialsTab } from '@/components/admin/TestimonialsTab';
 import { ReorderTestimonialsTab } from '@/components/admin/ReorderTestimonialsTab';
 import { CategorizeTab } from '@/components/admin/CategorizeTab';
@@ -88,6 +90,15 @@ export default function AdminDashboard() {
     updateImage: updateStoryImage,
     removeImage: removeStoryImage,
   } = useStoryImages();
+  const {
+    name: artistName,
+    description: artistDescription,
+    loading: artistLoading,
+    getImage: getArtistImage,
+    saveProfile: saveArtistProfile,
+    saveImage: saveArtistImage,
+    removeImage: removeArtistImage,
+  } = useArtistAbout();
 
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<AdminTab>('products');
@@ -299,6 +310,18 @@ export default function AdminDashboard() {
               setIsFormOpen(true);
             }}
             onDelete={handleDeleteProduct}
+          />
+        )}
+
+        {activeTab === 'artist' && (
+          <ArtistTab
+            name={artistName}
+            description={artistDescription}
+            getImage={getArtistImage}
+            loading={artistLoading}
+            onSaveProfile={saveArtistProfile}
+            onSaveImage={saveArtistImage}
+            onRemoveImage={removeArtistImage}
           />
         )}
 

@@ -45,3 +45,17 @@ export interface StoryImage {
   image: string;
   sortPriority?: number;
 }
+
+export const ARTIST_IMAGE_SLOTS = ['1', '2', '3', '4'] as const;
+export type ArtistImageSlot = (typeof ARTIST_IMAGE_SLOTS)[number];
+
+export interface ArtistProfile {
+  id: string;
+  name?: string;
+  description: string;
+}
+
+export interface ArtistImage {
+  id: ArtistImageSlot;
+  image: string;
+}

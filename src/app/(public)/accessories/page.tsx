@@ -8,6 +8,8 @@ import { Leaf, Sprig, Branch } from '@/components/ui/Botanical';
 import { useProducts } from '@/lib/useProducts';
 import { useCategoryImages } from '@/lib/useCategoryImages';
 import { resolveProductCategory } from '@/lib/productCategory';
+import { useArtistAbout } from '@/lib/useArtistAbout';
+import { AboutTheArtist } from '@/components/AboutTheArtist';
 
 const CRAFTS = [
   {
@@ -27,6 +29,12 @@ const CRAFTS = [
 export default function AccessoriesPage() {
   const { products, loading } = useProducts();
   const { getImage } = useCategoryImages();
+  const {
+    name: artistName,
+    description: artistDescription,
+    slotImages: artistImages,
+    loading: artistLoading,
+  } = useArtistAbout();
   const heroImage = getImage('accessories');
 
   const accessories = products.filter(
@@ -92,6 +100,13 @@ export default function AccessoriesPage() {
           </div>
         </div>
       </section>
+
+      <AboutTheArtist
+        name={artistName}
+        description={artistDescription}
+        images={artistImages}
+        loading={artistLoading}
+      />
 
       <section className="relative py-16 md:py-24 bg-white overflow-hidden">
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-48 md:w-64 h-16 md:h-20 text-emerald-900 pointer-events-none opacity-40">
