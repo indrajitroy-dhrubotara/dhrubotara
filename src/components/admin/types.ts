@@ -1,5 +1,6 @@
 export type AdminTab =
   | 'products'
+  | 'accessories'
   | 'testimonials'
   | 'reorder-testimonials'
   | 'categorize'
