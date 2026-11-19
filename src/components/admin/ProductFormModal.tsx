@@ -2,7 +2,8 @@
 
 import { useRef, useState } from 'react';
 import { Save, Upload, X } from 'lucide-react';
-import { type Product, type ProductCategory } from '@/lib/types';
+import { type Product } from '@/lib/types';
+import { isProductCategory, PRODUCT_CATEGORY_IDS, PRODUCT_CATEGORY_LABELS } from '@/lib/productCategory';
 import { uploadToStorage } from '@/lib/uploadToStorage';
 import { AdminThumb } from './AdminThumb';
 
@@ -123,18 +124,21 @@ export function ProductFormModal({
             <label className="block text-sm font-medium text-stone-700 mb-1">Product Category</label>
             <select
               value={product.productCategory ?? ''}
-              onChange={(e) =>
+              onChange={(e) => {
+                const value = e.target.value;
                 onChange({
                   ...product,
-                  productCategory: (e.target.value as ProductCategory) || undefined,
-                })
-              }
+                  productCategory: isProductCategory(value) ? value : undefined,
+                });
+              }}
               className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500 bg-white text-stone-700"
             >
               <option value="">— Uncategorized —</option>
-              <option value="condiments">Pickles &amp; Condiments</option>
-              <option value="herbal">Herbal Medicines</option>
-              <option value="rice-other">Rice &amp; Other Products</option>
+              {PRODUCT_CATEGORY_IDS.map((id) => (
+                <option key={id} value={id}>
+                  {PRODUCT_CATEGORY_LABELS[id]}
+                </option>
+              ))}
             </select>
           </div>
           <div>

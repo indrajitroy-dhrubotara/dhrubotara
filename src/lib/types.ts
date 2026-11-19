@@ -1,4 +1,4 @@
-export type ProductCategory = 'condiments' | 'herbal' | 'rice-other';
+export type ProductCategory = 'condiments' | 'herbal' | 'rice-other' | 'accessories';
 
 export interface Product {
   id: string;

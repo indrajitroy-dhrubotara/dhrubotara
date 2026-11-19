@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import Link from "next/link";
 import { Mail, Phone, Instagram, Facebook, MessageCircle } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
@@ -47,6 +48,11 @@ export function Footer() {
               <p className="font-sans text-sm leading-relaxed max-w-xs mx-auto md:mx-0 text-stone-400">
                 Bringing the purity of nature and the warmth of tradition to your home. Authentic goods, crafted with love.
               </p>
+              <div className="flex flex-wrap justify-center md:justify-start gap-x-4 gap-y-2 mt-5 text-sm">
+                <Link href="/story" className="hover:text-white transition-colors">Story</Link>
+                <Link href="/#products" className="hover:text-white transition-colors">Products</Link>
+                <Link href="/accessories" className="hover:text-white transition-colors">Accessories</Link>
+              </div>
             </div>
 
             <div className="flex flex-col items-center md:items-start space-y-4">

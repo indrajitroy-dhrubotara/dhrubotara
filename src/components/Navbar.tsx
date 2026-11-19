@@ -11,6 +11,7 @@ import { CartButton } from '@/components/cart/CartButton';
 const NAV_ITEMS = [
   { label: 'Story', href: '/story', isPage: true },
   { label: 'Products', href: '/#products', isPage: false },
+  { label: 'Accessories', href: '/accessories', isPage: true },
   { label: 'Testimonials', href: '/#testimonials', isPage: false },
   { label: 'Contact', href: '/#contact', isPage: false },
 ];
@@ -68,7 +69,7 @@ export function Navbar() {
           {/* Right: nav links (desktop) + hamburger (mobile) */}
           <div className="flex items-center">
             {/* Desktop nav links */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-6 lg:space-x-8">
               {NAV_ITEMS.map((item) => (
                 <button
                   key={item.label}
