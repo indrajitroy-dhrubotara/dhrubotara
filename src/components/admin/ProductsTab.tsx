@@ -2,13 +2,12 @@
 
 import { Edit2, FileJson, Plus, Trash2 } from 'lucide-react';
 import { type Product } from '@/lib/types';
+import { PRODUCT_CATEGORY_LABELS } from '@/lib/productCategory';
 import { AdminThumb } from './AdminThumb';
 
 function categoryLabel(category: Product['productCategory']) {
-  if (category === 'condiments') return 'Condiments';
-  if (category === 'herbal') return 'Herbal';
-  if (category === 'rice-other') return 'Rice & Other';
-  return null;
+  if (!category) return null;
+  return PRODUCT_CATEGORY_LABELS[category];
 }
 
 interface ProductsTabProps {

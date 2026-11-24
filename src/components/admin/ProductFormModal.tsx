@@ -2,13 +2,15 @@
 
 import { useRef, useState } from 'react';
 import { Save, Upload, X } from 'lucide-react';
-import { type Product, type ProductCategory } from '@/lib/types';
+import { type Product } from '@/lib/types';
+import { isProductCategory, PRODUCT_CATEGORY_IDS, PRODUCT_CATEGORY_LABELS } from '@/lib/productCategory';
 import { uploadToStorage } from '@/lib/uploadToStorage';
 import { AdminThumb } from './AdminThumb';
 
 interface ProductFormModalProps {
   product: Product;
   isSaving: boolean;
+  variant?: 'full' | 'accessory';
   onChange: (product: Product) => void;
   onSave: (e: React.FormEvent) => void;
   onClose: () => void;
@@ -17,10 +19,12 @@ interface ProductFormModalProps {
 export function ProductFormModal({
   product,
   isSaving,
+  variant = 'full',
   onChange,
   onSave,
   onClose,
 }: ProductFormModalProps) {
+  const isAccessory = variant === 'accessory';
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
@@ -55,7 +59,13 @@ export function ProductFormModal({
       <div className="bg-white w-full max-w-2xl rounded-sm shadow-2xl overflow-hidden">
         <div className="flex justify-between items-center px-6 py-4 border-b border-stone-100">
           <h2 className="text-xl font-serif text-emerald-950">
-            {product.id.startsWith('new-') ? 'New Product' : 'Edit Product'}
+            {product.id.startsWith('new-')
+              ? isAccessory
+                ? 'New Accessory'
+                : 'New Product'
+              : isAccessory
+                ? 'Edit Accessory'
+                : 'Edit Product'}
           </h2>
           <button onClick={onClose} className="text-stone-400 hover:text-stone-600 cursor-pointer">
             <X size={24} />
@@ -63,7 +73,7 @@ export function ProductFormModal({
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
           <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 sm:col-span-1">
+            <div className={isAccessory ? 'col-span-2' : 'col-span-2 sm:col-span-1'}>
               <label className="block text-sm font-medium text-stone-700 mb-1">Name</label>
               <input
                 type="text"
@@ -73,38 +83,45 @@ export function ProductFormModal({
                 className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
               />
             </div>
-            <div className="col-span-2 sm:col-span-1">
-              <label className="block text-sm font-medium text-stone-700 mb-1">Tag</label>
-              <input
-                type="text"
-                value={product.tag}
-                onChange={(e) => onChange({ ...product, tag: e.target.value })}
-                className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
-              />
-            </div>
+            {!isAccessory && (
+              <div className="col-span-2 sm:col-span-1">
+                <label className="block text-sm font-medium text-stone-700 mb-1">Tag</label>
+                <input
+                  type="text"
+                  value={product.tag}
+                  onChange={(e) => onChange({ ...product, tag: e.target.value })}
+                  className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
+                />
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-2 sm:col-span-1">
+            <div className={isAccessory ? 'col-span-2' : 'col-span-2 sm:col-span-1'}>
               <label className="block text-sm font-medium text-stone-700 mb-1">Price</label>
               <input
                 type="text"
+                required={isAccessory}
                 value={product.price || ''}
                 onChange={(e) => onChange({ ...product, price: e.target.value })}
                 className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="Rs. 350"
               />
             </div>
-            <div className="col-span-2 sm:col-span-1">
-              <label className="block text-sm font-medium text-stone-700 mb-1">Weight</label>
-              <input
-                type="text"
-                value={product.weight || ''}
-                onChange={(e) => onChange({ ...product, weight: e.target.value || undefined })}
-                className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
-                placeholder="225 gms"
-              />
-            </div>
+            {!isAccessory && (
+              <div className="col-span-2 sm:col-span-1">
+                <label className="block text-sm font-medium text-stone-700 mb-1">Weight</label>
+                <input
+                  type="text"
+                  value={product.weight || ''}
+                  onChange={(e) => onChange({ ...product, weight: e.target.value || undefined })}
+                  className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
+                  placeholder="225 gms"
+                />
+              </div>
+            )}
           </div>
+          {!isAccessory && (
+            <>
           <div>
             <label className="block text-sm font-medium text-stone-700 mb-1">Sort Priority</label>
             <input
@@ -123,22 +140,29 @@ export function ProductFormModal({
             <label className="block text-sm font-medium text-stone-700 mb-1">Product Category</label>
             <select
               value={product.productCategory ?? ''}
-              onChange={(e) =>
+              onChange={(e) => {
+                const value = e.target.value;
                 onChange({
                   ...product,
-                  productCategory: (e.target.value as ProductCategory) || undefined,
-                })
-              }
+                  productCategory: isProductCategory(value) ? value : undefined,
+                });
+              }}
               className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500 bg-white text-stone-700"
             >
               <option value="">— Uncategorized —</option>
-              <option value="condiments">Pickles &amp; Condiments</option>
-              <option value="herbal">Herbal Medicines</option>
-              <option value="rice-other">Rice &amp; Other Products</option>
+              {PRODUCT_CATEGORY_IDS.map((id) => (
+                <option key={id} value={id}>
+                  {PRODUCT_CATEGORY_LABELS[id]}
+                </option>
+              ))}
             </select>
           </div>
+            </>
+          )}
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Image</label>
+            <label className="block text-sm font-medium text-stone-700 mb-1">
+              {isAccessory ? 'Picture' : 'Image'}
+            </label>
             <div className="flex items-center space-x-4">
               <AdminThumb src={product.image} alt="Preview" size={64} />
               <button
@@ -147,7 +171,7 @@ export function ProductFormModal({
                 className="px-4 py-2 border border-stone-300 rounded-sm text-sm font-medium text-stone-700 hover:bg-stone-50 flex items-center cursor-pointer"
               >
                 <Upload size={16} className="mr-2" />
-                {uploading ? 'Uploading...' : product.image ? 'Change Image' : 'Upload Image'}
+                {uploading ? 'Uploading...' : product.image ? (isAccessory ? 'Change Picture' : 'Change Image') : (isAccessory ? 'Upload Picture' : 'Upload Image')}
               </button>
               <input
                 type="file"
@@ -159,14 +183,26 @@ export function ProductFormModal({
             </div>
           </div>
           <div>
-            <label className="block text-sm font-medium text-stone-700 mb-1">Short Description</label>
+            <label className="block text-sm font-medium text-stone-700 mb-1">
+              {isAccessory ? 'Description' : 'Short Description'}
+            </label>
             <textarea
-              rows={2}
+              rows={isAccessory ? 4 : 2}
+              required={isAccessory}
               value={product.description}
-              onChange={(e) => onChange({ ...product, description: e.target.value })}
+              onChange={(e) => {
+                const description = e.target.value;
+                onChange({
+                  ...product,
+                  description,
+                  ...(isAccessory ? { longDescription: description } : {}),
+                });
+              }}
               className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
+              placeholder={isAccessory ? 'A few lines about this painted piece' : undefined}
             />
           </div>
+          {!isAccessory && (
           <div>
             <label className="block text-sm font-medium text-stone-700 mb-1">Long Story</label>
             <textarea
@@ -176,6 +212,7 @@ export function ProductFormModal({
               className="w-full border border-stone-300 px-3 py-2 rounded-sm focus:ring-emerald-500 focus:border-emerald-500"
             />
           </div>
+          )}
           <div className="pt-4 border-t border-stone-100 flex justify-end space-x-3">
             <button
               type="button"

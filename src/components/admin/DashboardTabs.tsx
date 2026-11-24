@@ -7,13 +7,17 @@ import {
   ListOrdered,
   MessageSquare,
   Package,
+  Palette,
   Tag,
+  User,
   type LucideIcon,
 } from 'lucide-react';
 import { type AdminTab } from './types';
 
 const TABS: { id: AdminTab; label: string; icon: LucideIcon }[] = [
   { id: 'products', label: 'Products', icon: Package },
+  { id: 'accessories', label: 'Accessories', icon: Palette },
+  { id: 'artist', label: 'Artist', icon: User },
   { id: 'testimonials', label: 'Testimonials', icon: MessageSquare },
   { id: 'reorder-testimonials', label: 'Reorder Reviews', icon: ListOrdered },
   { id: 'categorize', label: 'Categorize', icon: Tag },

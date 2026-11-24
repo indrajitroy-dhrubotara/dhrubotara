@@ -10,6 +10,7 @@ import { Skeleton } from '@/components/ui/Skeleton';
 import { FadeInImage } from '@/components/ui/FadeInImage';
 import { trackProductView, trackEvent } from '@/lib/analytics';
 import { useCart, parsePriceToNumber } from '@/context/CartContext';
+import { resolveProductCategory } from '@/lib/productCategory';
 
 export default function ProductDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -78,9 +79,14 @@ export default function ProductDetailPage() {
     <div className="min-h-screen bg-[#FBF6E9] pt-24 pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <Link href="/" className="inline-flex items-center text-stone-500 hover:text-emerald-900 mb-8 transition-colors group">
+        <Link
+          href={resolveProductCategory(product) === 'accessories' ? '/accessories' : '/'}
+          className="inline-flex items-center text-stone-500 hover:text-emerald-900 mb-8 transition-colors group"
+        >
           <ArrowLeft size={20} className="mr-2 group-hover:-translate-x-1 transition-transform" />
-          <span className="font-sans text-sm tracking-wide uppercase">Back to Collection</span>
+          <span className="font-sans text-sm tracking-wide uppercase">
+            {resolveProductCategory(product) === 'accessories' ? 'Back to Accessories' : 'Back to Collection'}
+          </span>
         </Link>
 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
